@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    container_name: econ_db
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: econ
+    ports:
+      - "5433:5432"
+    volumes:
+      - econ_db_data:/var/lib/postgresql/data
+
+volumes:
+  econ_db_data:
