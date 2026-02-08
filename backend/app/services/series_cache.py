@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
@@ -8,7 +8,7 @@ from backend.app.models import Series, DataPoint
 def _is_fresh(series: Series) ->bool:
     if not series.last_fetched_at:
         return False
-    return datetime.utcnow()<series.last_fetched_at+ timedelta(hours=series.ttl_hours)
+    return datetime.now(timezone.utc)< series.last_fetched_at + timedelta(hours=series.ttl_hours)
 
 def get_or_create_series(cache_key: str, source: str, title: str |None, ttl_hours: int)->int:
     with get_session() as session:
@@ -33,9 +33,10 @@ def upsert_points(series_id: int, points: list[dict]):
             dp= DataPoint(series_id= series_id, date=p["date"], value=p["value"])
             session.add(dp)
             try:
-                session.flush()
+                with session.begin_nested():
+                    session.flush()
             except IntegrityError:
-                session.rollback()
+                pass
         session.commit()
 
 def load_points(series_id: int) ->list[dict]:
@@ -46,7 +47,7 @@ def load_points(series_id: int) ->list[dict]:
 def mark_fetched(series_id: int):
     with get_session() as session:
         s= session.get(Series, series_id)
-        s.last_fetched_at = datetime.utcnow()
+        s.last_fetched_at = datetime.now(timezone.utc)
         session.commit()
 
 def get_series_by_key(cache_key: str)-> Series| None:

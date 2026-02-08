@@ -1,5 +1,5 @@
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 
 BASE = "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data"
 
@@ -13,10 +13,12 @@ def _build_url(dataset: str, key:str, start_period:str, end_period: str) ->str:
 
 def _parse_time_str(t: str)-> datetime:
     if "-" in t:
-        return datetime.strptime(t, "%Y-%m")
-    if "M" in t and len(t) >= 6:
-        return datetime.strptime(t.replace("M", "-"), "%Y-%m")
-    return datetime.strptime(t, "%Y")
+        dt= datetime.strptime(t, "%Y-%m")
+    elif "M" in t and len(t) >= 6:
+        dt= datetime.strptime(t.replace("M", "-"), "%Y-%m")
+    else:
+        dt= datetime.strptime(t, "%Y")
+    return dt.replace(tzinfo=timezone.utc)
 
 def parse_json_to_points(payload: dict)-> list[dict]:
     dim_order= payload.get("id", [])
@@ -59,8 +61,7 @@ def fetch_timeseries(dataset: str, key: str, start_period= "2019-01", end_period
     url= _build_url(dataset, key, start_period, end_period)
     r= requests.get(url, timeout=30, headers={"Accept": "application/json"})
 
-    if r.status_code >=400:
-        raise RuntimeError(f"Eurostat error {r.status_code} for url={url}. body_start={r.text[:800]!r}")
+    r.raise_for_status()
 
     payload= r.json()
 

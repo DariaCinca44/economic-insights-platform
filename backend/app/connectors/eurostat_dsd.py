@@ -3,8 +3,8 @@ import xml.etree.ElementTree as ET
 
 BASE_DSD= "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/datastructure/ESTAT"
 
-def fetch_dsd_xml(dataset: str)-> dict:
-    url= f"{BASE_DSD}/{dataset}/latest?format=JSON"
+def fetch_dsd_xml(dataset: str)-> str:
+    url= f"{BASE_DSD}/{dataset}/latest"
     headers={
         "Accept": "application/xml",
         "User-Agent": "economic-insights-platform/1.0"

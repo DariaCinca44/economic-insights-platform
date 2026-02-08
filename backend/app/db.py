@@ -19,12 +19,13 @@ def get_engine():
     return _ENGINE
 
 def get_session():
+    global _SessionLocal
     if _SessionLocal is None:
         get_engine()
+    assert _SessionLocal is not None
     return _SessionLocal()
 
 def db_ping():
     engine = get_engine()
     with engine.connect() as conn:
-        conn.execute(text("SELECT 1"))
-
+        conn.execute(text("SELECT 1")).scalar()

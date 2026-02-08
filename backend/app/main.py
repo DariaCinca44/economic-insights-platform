@@ -1,14 +1,30 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, abort
+from werkzeug.exceptions import HTTPException
 from flask_cors import CORS
 from backend.app.db import db_ping
 from backend.app.domain_config import DOMAIN_CONFIG
-from flask import request
 from backend.app.connectors.eurostat_dsd import fetch_dsd_xml, extract_dimensions_order_from_xml
 from backend.app.connectors.eurostat import fetch_timeseries
 from backend.app.services.dashboard_data import get_points_for_series
 
 app= Flask(__name__)
 CORS(app)
+
+@app.errorhandler(HTTPException)
+def handler_http_exception(e: HTTPException):
+    return jsonify({
+        "error": e.name,
+        "message": e.description,
+        "status": e.code
+    }), e.code
+
+@app.errorhandler(Exception)
+def handler_unexpected_exception(e: Exception):
+    return jsonify({
+        "error": "Internal Server Error",
+        "message": str(e),
+        "status": 500
+    }), 500
 
 @app.get("/health")
 def health():
@@ -57,7 +73,7 @@ def dashboard():
 def eurostat_dsd():
     dataset= request.args.get("dataset")
     if not dataset:
-        return jsonify({"error": "Missing dataset param"})
+        abort(400, description="Missing dataset param")
     xml_text= fetch_dsd_xml(dataset)
     dims= extract_dimensions_order_from_xml(xml_text)
 
@@ -71,7 +87,7 @@ def eurostat_test():
     dataset= request.args.get("dataset")
     key= request.args.get("key")
     if not dataset or not key:
-        return jsonify({"error": "Use ?dataset=...&key=..."}),400
+        abort(400, description= "Use ?dataset=...&key=...")
 
     pts= fetch_timeseries(dataset, key, start_period="2020-01", end_period="2026-02")
     return jsonify({"count": len(pts), "sample": pts[:5]})
