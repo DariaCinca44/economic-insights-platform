@@ -1,14 +1,16 @@
-import React from 'react';
-import{ ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import {Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart} from 'recharts'
 
-function formatMonth(iso){
+export type ChartPoint = { date: string; value: number}
+type Props = {title: string; points: ChartPoint[]}
+
+function formatMonth(iso: string): string{
     const d= new Date(iso)
     const y= d.getFullYear()
     const m = String(d.getMonth()+1).padStart(2,'0')
     return `${y}-${m}`
 }
 
-export default function LineChartCard({title, points}){ 
+export default function LineChartCard({title, points}: Props) { 
     const data = (points || []).map((p) => ({
         date: p.date,
         month: formatMonth(p.date),

@@ -1,17 +1,23 @@
-import React, {useEffect, useMemo, useState} from 'react'
-import {fetchDashboard} from '../api/dashboard'
+import {useEffect, useMemo, useState} from 'react'
+import { fetchDashboard } from '../api/dashboard'
 import LineChartCard from './LineChartCard'
+ 
+type Domain = "food" | "tech"
 
-const DOMAINS= [
+const DOMAINS: Array<{id: Domain; label: string}> = [
     {id: "food", label: "Alimentar"},
     {id: "tech", label: "Tehnologic"}
 ]
 
+type ChartPoint = { date: string; value: number}
+type ChartData= {title?: string; points?: ChartPoint[]}
+type DashboardData = { domain: string; label: string; charts?: { inflation?: ChartData; consumption?: ChartData}}
+
 export default function Dashboard() {
-    const [domain, setDomain] = useState("food")
-    const [data, setData] = useState(null)
-    const [loading, setLoading] = useState(false)
-    const [err, setErr]= useState("")
+    const [domain, setDomain] = useState<Domain>("food")
+    const [data, setData] = useState<DashboardData | null>(null)
+    const [loading, setLoading] = useState< boolean>(false)
+    const [err, setErr]= useState<string>("")
 
     useEffect(() => {
         let cancelled = false
@@ -20,13 +26,14 @@ export default function Dashboard() {
             setLoading(true)
             setErr("")
             try{
-                const json = await fetchDashboard(domain)
+                const json = (await fetchDashboard(domain)) as DashboardData
                 if(!cancelled){
                     setData(json)
                 }
-            } catch(e){
+            } catch(e: unknown){
                 if(!cancelled){
-                    setErr(e?.message || "Fetch error!")
+                    const message = e instanceof Error ?  e.message: "Fetch error!" 
+                    setErr(message)
                 }
             } finally {
                 if(!cancelled){
@@ -58,7 +65,7 @@ export default function Dashboard() {
                     <div style={{color: "#6b7280", marginTop: 4}}>Domeniu: <b>{title}</b></div>
                 </div>
 
-            <select value={domain} onChange= {(e) => setDomain(e.target.value)} style={{
+            <select value={domain} onChange= {(e) => setDomain(e.target.value as Domain)} style={{
                 padding: "10px 12px",
                 borderRadius: 12,
                 border: "1px solid #e5e7eb",
