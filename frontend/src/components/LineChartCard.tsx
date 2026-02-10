@@ -1,4 +1,5 @@
-import {Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart} from 'recharts'
+import {Line, CartesianGrid, XAxis, YAxis, Tooltip, LineChart, ResponsiveContainer} from 'recharts'
+import Card from './Card'
 
 export type ChartPoint = { date: string; value: number}
 type Props = {title: string; points: ChartPoint[]}
@@ -17,26 +18,27 @@ export default function LineChartCard({title, points}: Props) {
         value: Number(p.value)
     }))
 
-    return(
-        <div style={{
-            border: "1px solid #e5e7eb",
-            borderRadius: 16,
-            padding: 16,
-            background: "white",
-            boxShadow: "0 1px 2px rgba(0,0,0,0.4)"
-        }}>
+    const empty= !Array.isArray(points) || points.length === 0
 
-        <div style={{fontSize: 18, fontWeight: "bold", marginBottom: 8, color: "white"}}>{title}</div>
-        
-        <div style={{ color: "#9ca3af",marginBottom: 8 }}> points: {Array.isArray(points) ? points.length : "not array"} </div>
-                <LineChart width={520} height={280} data={data}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" minTickGap={28} />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="value" dot={false} />
-                    <Legend />
-                </LineChart>
-        </div>
+    return(
+       <Card title={title}>
+        {empty ? (
+            <div className= 'rounded-xl bg-slate-50 p-4 text-sm font-semibold text-slate-600 dark:bg-white/5 dark:text-slate-300'>
+                No data available
+            </div>
+        ) : (
+            <div className='h-72 w-full'>
+                <ResponsiveContainer width= '100%' height= '100%'>
+                    <LineChart data={data}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" minTickGap={28} />
+                        <YAxis />
+                        <Tooltip />
+                        <Line type='monotone' dataKey='value' dot={false}/>
+                    </LineChart>
+                </ResponsiveContainer>
+            </div>
+        )}
+       </Card>
     )
 }
