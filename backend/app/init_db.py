@@ -1,5 +1,5 @@
-from backend.app.db import get_engine
-from backend.app.models import Base
+from backend.app.core.db import get_engine
+from backend.app.core.models import Base
 
 def main():
     engine = get_engine()

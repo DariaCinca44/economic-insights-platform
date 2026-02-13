@@ -1,3 +1,4 @@
+import {useState} from 'react'
 import Card from './Card'
 import DomainSelect, {type Domain} from './DomainSelect'
 
@@ -12,7 +13,7 @@ export default function DomainSetupModal({isOpen, onConfirm}: {
 }) {
     if (!isOpen) return null
 
-    let selected: Domain = 'food'
+    const [selected, setSelected] = useState<Domain>('food')
 
     return(
         <div className= 'fixed inset-0 z-50'>
@@ -26,10 +27,7 @@ export default function DomainSetupModal({isOpen, onConfirm}: {
                     </div>
 
                     <div className= 'mt-5'>
-                        <DomainSelect value={selected} onChange={(d) => {
-                            selected= d;
-                        }}
-                        options= {DOMAINS} />
+                        <DomainSelect value={selected} onChange={setSelected} options= {DOMAINS} />
                     </div>
 
                     <button onClick={() => onConfirm(selected)} className='mt-6 w-full rounded-2xl bg-violet-600 px-4 py-3 text-sm font-extrabold text-white hover:bg-violet-700'>Continua</button>

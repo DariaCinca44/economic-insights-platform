@@ -27,3 +27,12 @@ class DataPoint(Base):
     __table_args__ = (
         UniqueConstraint("series_id", "date", name="uq_series_date"),
     )
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int]= mapped_column(Integer, primary_key=True)
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String, nullable=False)
+    selected_domain: Mapped[str] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime]= mapped_column(DateTime(timezone=True), default= lambda: datetime.now(timezone.utc))

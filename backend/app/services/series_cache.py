@@ -2,8 +2,8 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from backend.app.db import get_session
-from backend.app.models import Series, DataPoint
+from backend.app.core.db import get_session
+from backend.app.core.models import Series, DataPoint
 
 def _is_fresh(series: Series) ->bool:
     if not series.last_fetched_at:
@@ -36,7 +36,7 @@ def upsert_points(series_id: int, points: list[dict]):
                 with session.begin_nested():
                     session.flush()
             except IntegrityError:
-                pass
+                session.rollback()
         session.commit()
 
 def load_points(series_id: int) ->list[dict]:

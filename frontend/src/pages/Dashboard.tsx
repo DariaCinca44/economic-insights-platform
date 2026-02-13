@@ -14,10 +14,12 @@ type ChartData= {title?: string; points?: ChartPoint[]}
 type DashboardData = { domain: string; label: string; charts?: { inflation?: ChartData; consumption?: ChartData}}
 
 export default function Dashboard() {
-    const [domain, setDomain] = useState<Domain>("food")
+    const initialDomain= (localStorage.getItem("domain") as Domain) || "food"
+    const [domain, setDomain] = useState<Domain>(initialDomain)
     const [data, setData] = useState<DashboardData | null>(null)
     const [loading, setLoading] = useState< boolean>(false)
     const [err, setErr]= useState<string>("")
+
 
     useEffect(() => {
         let cancelled = false
