@@ -6,6 +6,8 @@ from backend.app.routes.dashboard import dashboard_bp
 from backend.app.routes.eurostat import eurostat_bp
 from backend.app.routes.auth import auth_bp
 from backend.app.core.db import db_ping
+from backend.app.routes.forecast import forecast_bp
+
 
 def create_app():
     app = Flask(__name__)
@@ -14,6 +16,7 @@ def create_app():
     app.register_blueprint(dashboard_bp, url_prefix='/api')
     app.register_blueprint(eurostat_bp, url_prefix='/api/eurostat')
     app.register_blueprint(auth_bp, url_prefix= '/api/auth')
+    app.register_blueprint(forecast_bp, url_prefix= '/api')
 
     @app.errorhandler(HTTPException)
     def handler_http_exception(e: HTTPException):
