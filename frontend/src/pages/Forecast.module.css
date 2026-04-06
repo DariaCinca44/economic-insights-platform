@@ -1,0 +1,156 @@
+.headerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.pageTitle {
+  font-size: 1.875rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.typeToggleGroup {
+  display: flex;
+  border-radius: 0.75rem;
+  background-color: #f1f5f9;
+  padding: 0.25rem;
+}
+
+:global(.dark) .typeToggleGroup {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.typeButton {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.typeButtonActive {
+  background-color: white;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  color: #0f172a;
+}
+
+:global(.dark) .typeButtonActive {
+  background-color: #1e293b;
+  color: white;
+}
+
+.typeButtonInactive {
+  background-color: transparent;
+  color: #64748b;
+}
+
+.monthsToggleGroup {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.monthButton {
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.monthButtonActive {
+  background-color: #7c3aed;
+  color: white;
+}
+
+.monthButtonInactive {
+  background-color: white;
+  color: #0f172a;
+}
+
+:global(.dark) .monthButtonInactive {
+  background-color: #1e293b; 
+  color: white;
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.loadingContainer {
+  height: 20rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chartContainer {
+  height: 20rem;
+  width: 100%;
+}
+
+.aiCard {
+  background: linear-gradient(to bottom right, #7c3aed, #4338ca);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  color: white;
+  box-shadow: 0 20px 25px -5px rgba(196, 181, 253, 0.5);
+}
+
+:global(.dark) .aiCard {
+  box-shadow: none;
+}
+
+.aiHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.aiIcon {
+  font-size: 1.875rem; 
+}
+
+.aiTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ede9fe;
+  margin: 0;
+}
+
+.aiText {
+  font-size: 1.25rem;
+  line-height: 1.625;
+  font-weight: 500;
+  opacity: 0.95;
+  font-style: italic;
+  margin: 0;
+}
+
+.aiBadges {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.625rem; 
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(237, 233, 254, 0.6); 
+}
+
+.aiBadge {
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.375rem;
+}

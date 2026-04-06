@@ -1,0 +1,91 @@
+.trigger {
+  display: inline-flex;
+  width: 14rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-radius: 1rem; 
+  border: 1px solid #e2e8f0; 
+  background-color: white;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem; 
+  font-weight: 800;
+  color: #0f172a;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); 
+  outline: none;
+}
+
+.trigger:focus {
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.5);
+}
+
+:global(.dark) .trigger {
+  border-color: rgba(255, 255, 255, 0.1);
+  background-color: #0f172a;
+  color: #f8fafc; 
+}
+
+.icon {
+  color: #64748b; 
+}
+
+:global(.dark) .icon {
+  color: #cbd5e1;
+}
+
+.content {
+  z-index: 50;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background-color: white;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); 
+}
+
+:global(.dark) .content {
+  border-color: rgba(255, 255, 255, 0.1);
+  background-color: #0f172a;
+}
+
+.viewport {
+  padding: 0.5rem;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+  border-radius: 0.75rem;
+  padding: 0.5rem 2.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a;
+  outline: none;
+}
+
+.item:hover,
+.item[data-highlighted] {
+  background-color: #f1f5f9;
+}
+
+:global(.dark) .item {
+  color: #f8fafc;
+}
+
+:global(.dark) .item:hover,
+:global(.dark) .item[data-highlighted] {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.itemIndicator {
+  position: absolute;
+  left: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.checkIcon {
+  color: #8b5cf6;
+}

@@ -1,41 +1,32 @@
 from flask import Blueprint, request, jsonify
-
-from backend.app.core.config import DOMAIN_CONFIG
-from backend.app.core.db import get_session
+import logging
 from backend.app.core.security import require_auth
-from backend.app.services.forecast_service import generate_forecast, get_ai_insight
-from backend.app.services.series_cache import get_series_by_key
+from backend.app.services.forecast_service import generate_multivariate_forecast
 
-forecast_bp= Blueprint('forecast', __name__)
+log = logging.getLogger(__name__)
+forecast_bp = Blueprint('forecast', __name__)
+
 
 @forecast_bp.get('/forecast')
 @require_auth
 def get_forecast():
-    domain= request.args.get('domain', 'food')
-    type_ = request.args.get('type', 'inflation')
-    months= int(request.args.get('months',6))
+    domain = request.args.get('domain', 'CP01').upper()
+    months_str = request.args.get('months', 6)
 
-    if domain not in DOMAIN_CONFIG:
-        return jsonify({'error': 'Invalid domain'}), 400
+    try:
+        months = int(months_str)
+    except ValueError:
+        months = 6
 
-    config= DOMAIN_CONFIG[domain][type_]
-    cache_key= f'eurostat:{config['dataset']}:{config['key']}'
+    log.info("Received forecast request for domain: %s, months: %d", domain, months)
 
-    with get_session() as session:
-        series= get_series_by_key(cache_key)
-
-        if not series:
-            return jsonify({'error': 'Data not found. Visit dashboard first'})
-
-        points = generate_forecast(series.id, session, months)
-
-        if not points:
-            return jsonify({'error': 'Date insuficiente pentru prognoza'}), 400
-
-        history = [p for p in points if not p['is_forecast']]
-        forecast = [p for p in points if p['is_forecast']]
-
-        explanation = get_ai_insight(config['title'], history, forecast)
-
-        data= generate_forecast(series.id, session, months)
-        return jsonify({'title': config['title'], 'points': data, 'explanation': explanation})
+    try:
+        forecast_result = generate_multivariate_forecast(domain_code = domain, months= months)
+        return jsonify(forecast_result), 200
+    
+    except ValueError as ve:
+        log.warning(f"Eroare de validare la prognoza pentru domeniul {domain}: {ve}")
+        return jsonify({"error": str(ve)}), 400
+    except Exception as e:
+        log.error(f"Eroare la generarea prognozei pentru domeniul {domain}: {e}")
+        return jsonify({"error": "A apărut o eroare la generarea prognozei."}), 500

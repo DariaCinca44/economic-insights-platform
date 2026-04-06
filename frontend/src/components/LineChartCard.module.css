@@ -1,0 +1,18 @@
+.emptyState {
+  border-radius: 0.75rem;
+  background-color: #f8fafc;
+  padding: 1rem; 
+  font-size: 0.875rem;
+  font-weight: 600; 
+  color: #475569;
+}
+
+:global(.dark) .emptyState {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+}
+
+.chartContainer {
+  height: 18rem; 
+  width: 100%;
+}

@@ -1,0 +1,33 @@
+.card {
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+}
+
+:global(.dark) .card {
+  border-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(15, 23, 42, 0.6);
+  box-shadow: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.25rem 0 1.25rem; 
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+:global(.dark) .title {
+  color: #f8fafc;
+}
+
+.content {
+  padding: 1.25rem;
+}

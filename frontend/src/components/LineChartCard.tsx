@@ -1,5 +1,6 @@
 import {Line, CartesianGrid, XAxis, YAxis, Tooltip, LineChart, ResponsiveContainer} from 'recharts'
 import Card from './Card'
+import styles from './LineChartCard.module.css'
 
 export type ChartPoint = { date: string; value: number}
 type Props = {title: string; points: ChartPoint[]}
@@ -23,17 +24,17 @@ export default function LineChartCard({title, points}: Props) {
     return(
        <Card title={title}>
         {empty ? (
-            <div className= 'rounded-xl bg-slate-50 p-4 text-sm font-semibold text-slate-600 dark:bg-white/5 dark:text-slate-300'>
-                No data available
+            <div className={styles.emptyState}>
+                No data to display
             </div>
-        ) : (
-            <div className='h-72 w-full'>
-                <ResponsiveContainer width= '100%' height= '100%'>
+        ): (
+            <div className={styles.chartContainer}>
+                <ResponsiveContainer width='100%' height='100%'>
                     <LineChart data={data}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" minTickGap={28} />
-                        <YAxis />
-                        <Tooltip />
+                        <CartesianGrid strokeDasharray= '3 3'/>
+                        <XAxis dataKey= 'month' minTickGap={28}/>
+                        <YAxis/>
+                        <Tooltip/>
                         <Line type='monotone' dataKey='value' dot={false}/>
                     </LineChart>
                 </ResponsiveContainer>

@@ -1,17 +1,19 @@
 import requests
 import xml.etree.ElementTree as ET
 
-BASE_DSD= "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/datastructure/ESTAT"
+BASE_DSD = "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/datastructure/ESTAT"
 
-def fetch_dsd_xml(dataset: str)-> str:
-    url= f"{BASE_DSD}/{dataset}/latest"
-    headers={
+
+def fetch_dsd_xml(dataset: str) -> str:
+    url = f"{BASE_DSD}/{dataset}/latest"
+    headers = {
         "Accept": "application/xml",
         "User-Agent": "economic-insights-platform/1.0"
     }
-    r= requests.get(url, timeout=30, headers=headers)
+    r = requests.get(url, timeout=30, headers=headers)
     r.raise_for_status()
     return r.text
+
 
 def extract_dimensions_order_from_xml(xml_text: str) -> list[dict]:
     root = ET.fromstring(xml_text)

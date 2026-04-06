@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import styles from './Login.module.css'
 
 export default function Login(){
     const navigate = useNavigate()
@@ -49,42 +50,32 @@ export default function Login(){
     }
 
     return(
-        <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950">
-            <div className="w-[95vw] max-w-[1200px] h-[80vh] max-h-[700px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden flex">
-                <div className="w-1/2 bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white p-10 flex flex-col justify-between">
-                    <div>
-                        <h1 className="text-4xl font-bold mb-4">MarketLens</h1>
-                        <p className="mt-4 text-sm opacity-80 max-w-sm mx-auto">
-                            AI-powered economic analytics & forecasting platform
-                        </p>
-                    </div>
+       <div className={styles.wrapper}>
+        <div className={styles.card}>
+
+            <div className={styles.leftSide}>
+                <div>
+                    <h1 className={styles.brandTitle}>Economic Insights Platform</h1>
+                    <p className={styles.brandSubtitle}>AI-powered economic analytics & forecasting platform</p>
                 </div>
+            </div>
 
-            <div className="w-1/2 flex flex-col justify-center px-16">
-                <h2 className="text-2xl font-semibold mb-2">
-                    {isSignup? "Creaza un cont nou" : "Bine ai revenit!"}
-                </h2>
-                <p className="text-sm text-graay-500 mb-6">
-                    {isSignup? "Inregistreaza-te pentru a accesa MarketLens" : "Conecteaza-te pentru a accesa MarketLens"}
-                </p>
+            <div className={styles.rightSide}>
+                <h2 className={styles.formTitle}>{isSignup? 'Creeaza cont':'Bine ai revenit!'}</h2>
+                <p className={styles.formSubtitle}>{isSignup? 'Inregistreaza-te pentru a accesa platforma.':'Conecteaza-te pentru a accesa platforma.'}</p>
+                <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}
+                className={styles.inputField} />
+                <input type="password" placeholder="Parola" value={password} onChange={e => setPassword(e.target.value)} className={styles.inputField} />
+                {error && 
+                    <div className={styles.errorText}>{error}</div>
+                }
 
-                <input type="email" placeholder="Email" value={email} onChange={e=> setEmail(e.target.value)} className="mb-4 px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                 <input type="password" placeholder="Password" value={password} onChange={e=> setPassword(e.target.value)} className="mb-4 px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-transparent focus: outline-none focus:ring-2 focus:ring-blue-500" />
+                <button onClick={handleSubmit} className={styles.submitButton}>{isSignup? 'Inregistreaza-te':'Conecteaza-te'}</button>
 
-                 {error && (
-                    <div className="text-red-500 text-sm mb-4">
-                        {error}
-                    </div>
-                 )}
-
-                 <button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl transition-all">
-                    {isSignup? "Inregistreaza-te" : "Conecteaza-te"}
-                </button>
-
-                <div className="mt-4 text-sm text-gray-500">
-                    {isSignup? "Ai deja un cont?" : "Nu ai un cont?"}
-                    <button className="ml-2 text-blue-600 hover:underline" onClick={()=> setIsSignup(!isSignup)}>
-                        {isSignup? "Conecteaza-te" : "Inregistreaza-te"}
+                <div className={styles.toggleContainer}>
+                    {isSignup? 'Ai deja un cont?':'Nu ai un cont?'}
+                    <button className={styles.toggleBtn} onClick={() => setIsSignup(!isSignup)}>
+                        {isSignup? 'Conecteaza-te':'Inregistreaza-te'}
                     </button>
                 </div>
             </div>
