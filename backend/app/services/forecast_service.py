@@ -21,7 +21,7 @@ def get_ai_insight(title, last_hist: float, last_fore: float):
         return 'Analiza AI momentan indisponibila'
 
     try:
-        model = genai.GenerativeModel(model_name='gemini-2.5-flash')
+        model = genai.GenerativeModel(model_name='gemini-1.5-flash')
 
         trend = 'crestere' if last_fore > last_hist else 'scadere'
 
@@ -43,7 +43,7 @@ def fetch_all_domain_data(domain_code: str):
         dataset= config["inflation"]["dataset"],
         key= config["inflation"]["key"],
         title= config["inflation"]["title"],
-        ttl_hours= config["inflation"].get("ttl_hours", 24)
+        ttl_hours= config["inflation"].get("ttl_hours", 8760)
     )
 
     consumption_data = get_points_for_series(
@@ -51,7 +51,7 @@ def fetch_all_domain_data(domain_code: str):
         dataset= config["consumption"]["dataset"],
         key= config["consumption"]["key"],
         title= config["consumption"]["title"],
-        ttl_hours= config["consumption"].get("ttl_hours", 24)
+        ttl_hours= config["consumption"].get("ttl_hours", 8760)
     )
 
     trends_data = get_points_for_series(
@@ -59,7 +59,7 @@ def fetch_all_domain_data(domain_code: str):
         dataset= "trends",
         key= config["trends"]["keywords"],
         title= config["trends"]["title"],
-        ttl_hours= 24
+        ttl_hours= 8760
     )
 
     return inflation_data["points"], consumption_data["points"], trends_data["points"]

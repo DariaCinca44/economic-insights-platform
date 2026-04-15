@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import delete
 
 from backend.app.core.db import get_session
 from backend.app.core.models import Series, DataPoint
@@ -32,14 +33,15 @@ def get_or_create_series(cache_key: str, source: str, title: str | None, ttl_hou
 
 def upsert_points(series_id: int, points: list[dict]):
     with get_session() as session:
-        for p in points:
-            dp = DataPoint(series_id=series_id, date=p["date"], value=p["value"])
+        session.execute(delete(DataPoint).where(DataPoint.series_id == series_id))
+        session.flush()
+
+        unique_points = {p["date"] : p["value"] for p in points}
+
+        for date_val, val in unique_points.items():
+            dp = DataPoint(series_id=series_id, date=date_val, value=val)
             session.add(dp)
-            try:
-                with session.begin_nested():
-                    session.flush()
-            except IntegrityError:
-                session.rollback()
+        
         session.commit()
 
 
@@ -50,12 +52,16 @@ def load_points(series_id: int) -> list[dict]:
     return [{"date": r.date.isoformat(), "value": r.value} for r in rows]
 
 
-def mark_fetched(series_id: int):
+def mark_fetched(identifier):
     with get_session() as session:
-        s = session.get(Series, series_id)
-        s.last_fetched_at = datetime.now(timezone.utc)
-        session.commit()
+        if isinstance(identifier,  int):
+            s = session.get(Series, identifier)
+        else:
+            s = session.execute(select(Series).where(Series.cache_key == str(identifier))).scalar_one_or_none()
 
+        if s:
+            s.last_fetched_at = datetime.now(timezone.utc)
+            session.commit()
 
 def get_series_by_key(cache_key: str) -> Series | None:
     with get_session() as session:

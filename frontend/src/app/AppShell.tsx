@@ -33,6 +33,7 @@ export default function AppShell({children, theme, onToggleTheme} : {
                         {item('/compare', 'Compare', GitCompare)}
                         {item('/export', 'Export', FileDown)}
                         {item('/settings', 'Settings', Settings)}
+                        {item('/explore', 'Explore', LineChart)}
                     </nav>
                 </aside>
 

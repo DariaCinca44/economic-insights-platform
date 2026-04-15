@@ -23,15 +23,14 @@ def fetch_trends_data(keywords: list[str], timeframe: str = 'today 5-y') -> list
         if 'isPartial' in df.columns:
             df = df.drop(columns=['isPartial'])
 
-        df_monthly = df.resample('MS').mean()
-        df_monthly = df_monthly.dropna()
+        df_monthly = df.resample('MS').mean().dropna()
 
         df_monthly['agregated_interest'] = df_monthly[kw_list].mean(axis=1)
 
         points = []
         for date, row in df_monthly.iterrows():
             points.append({
-                "date": date.isoformat(),
+                "date": date.strftime('%Y-%m-%d'),
                 "value": round(float(row['agregated_interest']), 2)
             })
 

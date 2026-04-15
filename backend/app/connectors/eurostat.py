@@ -1,12 +1,14 @@
 import requests
 from datetime import datetime, timezone
+from urllib.parse import quote
 
 BASE = "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data"
 
 
 def _build_url(dataset: str, key: str, start_period: str, end_period: str) -> str:
+    safe_key = quote(key)
     return (
-        f"{BASE}/{dataset}/{key}"
+        f"{BASE}/{dataset}/{safe_key}"
         f"?format=JSON"
         f"&startPeriod={start_period}"
         f"&endPeriod={end_period}"

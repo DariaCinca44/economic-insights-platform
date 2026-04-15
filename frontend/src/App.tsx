@@ -35,20 +35,14 @@ export default function App() {
         <PrivateRoute>
           <AppShell theme={theme} onToggleTheme={() => setTheme((t)=> (t === 'dark' ? 'light': 'dark'))}>
           <AppRoutes />
-          <DomainSetupModal isOpen={needDomain} onConfirm={async(domain: Domain) => {
-            await fetch('/api/auth/profile/update-domain',{
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-              },
-              body: JSON.stringify({domain})
-            });
-            localStorage.setItem('domain', domain);
-            setPrefferedDomain(domain);
-            setNeedsDomain(false);
-            window.location.reload();
+          {needDomain && (
+          <DomainSetupModal onConfirm={async(domain: string) => {
+              localStorage.setItem('domain', domain);
+              setPrefferedDomain(domain as Domain);
+              setNeedsDomain(false);
+              window.location.reload();
           }} />
+          )}
          </AppShell>
         </PrivateRoute>
         } />

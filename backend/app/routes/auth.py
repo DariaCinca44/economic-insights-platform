@@ -13,6 +13,7 @@ def signup():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
+    account_type = data.get('accountType', 'fizic')
 
     if not email or not password:
         return jsonify({'error': 'Email and password required'}), 400
@@ -22,7 +23,7 @@ def signup():
         if user_exists:
             return jsonify({'error': 'Email deja existent!'}), 409
 
-        new_user = User(email=email, password_hash=hash_password(password), selected_domain=None)
+        new_user = User(email=email, password_hash=hash_password(password), account_type = account_type, primary_domain = None, secondary_domains= [], is_all_domains = False)
 
         session.add(new_user)
         session.commit()
@@ -43,20 +44,24 @@ def login():
         token = create_access_token(user.id)
         return jsonify({
             'token': token,
-            'user': {'email': user.email, 'domain': user.selected_domain}
+            'user': {'email': user.email, 'domain': user.primary_domain, 'accountType': user.account_type, 'primaryDomain' : user.primary_domain, 'secondaryDomains': user.secondary_domains, 'isAllDomains': user.is_all_domains}
         })
 
 
-@auth_bp.post('/profile/update-domain')
+@auth_bp.put('/profile')
 @require_auth
 def update_domain():
     data = request.get_json()
-    new_domain = data.get('domain')
+    primary_domain = data.get('primaryDomain')
+    secondary_domains = data.get('secondaryDomains', [])
+    is_all_domains = data.get('isAllDomains', False)
 
     with get_session() as session:
         user = session.get(User, g.user_id)
-        if user and new_domain in DOMAIN_CONFIG:
-            user.selected_domain = new_domain
+        if user:
+            user.primary_domain = primary_domain
+            user.secondary_domains = secondary_domains
+            user.is_all_domains = is_all_domains
             session.commit()
-            return jsonify({'message': 'Domeniu actualizat!'}), 200
+            return jsonify({'message': 'Profil actualizat!'}), 200
     return jsonify({'error': 'Eroare la actualizare'}), 400

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, Integer, DateTime, Float, ForeignKey, UniqueConstraint
+from sqlalchemy import String, Integer, DateTime, Float, ForeignKey, UniqueConstraint, Boolean, JSON
 from datetime import datetime, timezone
 
 
@@ -38,5 +38,8 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
-    selected_domain: Mapped[str] = mapped_column(String, nullable=True)
+    account_type: Mapped[str] = mapped_column(String(20), nullable = False, default= "fizic")
+    primary_domain: Mapped[str |None] = mapped_column(String(20), nullable = True)
+    secondary_domains: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    is_all_domains: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

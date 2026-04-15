@@ -1,97 +1,95 @@
-import {useEffect, useMemo, useState} from 'react'
-import { fetchDashboard } from '../api/dashboard'
-import LineChartCard from '../components/LineChartCard'
-import Card from '../components/Card'
-import DomainSelect from '../components/DomainSelect'
-import {DOMAINS, type Domain, DEFAULT_DOMAIN} from '../config/domains'
-import styles from './Dashboard.module.css'
+import { useEffect, useState } from "react";
+import styles from "./Dashboard.module.css";
+import { fetchUserDomains, fetchDomainData, type DomainData } from "../api/dashboard";
+import LineChartCard from "../components/LineChartCard";
 
-type ChartPoint = { date: string; value: number}
-type ChartData= {title?: string; points?: ChartPoint[]}
-type DashboardData = { domain: string; label: string; charts?: { inflation?: ChartData; consumption?: ChartData, trends?: ChartData}}
-
-export default function Dashboard() {
-    const initialDomain= (localStorage.getItem("domain") as Domain) || DEFAULT_DOMAIN
-    const [domain, setDomain] = useState<Domain>(initialDomain)
-    const [data, setData] = useState<DashboardData | null>(null)
-    const [loading, setLoading] = useState< boolean>(false)
-    const [err, setErr]= useState<string>("")
-
+function DashboardSection({ domainId, domainLabel, index }: { domainId: string, domainLabel: string, index: number }) {
+    const [data, setData] = useState<DomainData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     useEffect(() => {
-        let cancelled = false
+        let isMounted = true;
+        
+        async function loadData() {
+            await new Promise(resolve => setTimeout(resolve, index * 800)); 
+            if (!isMounted) return;
 
-        async function run(){
-            setLoading(true)
-            setErr("")
-            try{
-                const json = (await fetchDashboard(domain)) as DashboardData
-                if(!cancelled){
-                    setData(json)
-                }
-            } catch(e: unknown){
-                if(!cancelled){
-                    const message = e instanceof Error ?  e.message: "Fetch error!" 
-                    setErr(message)
-                }
+            try {
+                setLoading(true);
+                const res = await fetchDomainData(domainId);
+                if (isMounted) setData(res);
+            } catch (err: any) {
+                if (isMounted) setError(err.message || "Eroare la incarcare");
             } finally {
-                if(!cancelled){
-                    setLoading(false)
-                }
+                if (isMounted) setLoading(false);
             }
-    } run()
-    return() => { cancelled = true}}, [domain])
+        }
+        
+        loadData();
+        return () => { isMounted = false; };
+    }, [domainId, index]);
 
-    const inflation = data?.charts?.inflation
-    const consumption = data?.charts?.consumption
-    const trends = data?.charts?.trends
-
-    const title= useMemo(() => {
-        const d= DOMAINS.find((x) => x.id === domain)
-        return d? d.label : domain
-    }, [domain])
-
-    return(
-       <div className={styles.container}>
-        <div className={styles.header}>
-            <div>
-                <div className={styles.pageTitle}>Dashboard</div>
-                <div className={styles.subtitle}>
-                    Domeniu: {" "}
-                    <span className={styles.subtitleHighlight}>{title}</span>
-                </div>
+    return (
+        <div style={{ marginBottom: '60px' }}>
+            <div style={{ paddingBottom: '15px', borderBottom: '1px solid rgba(139, 92, 246, 0.3)', marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '24px', color: 'currentColor', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ display: 'inline-block', width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#8b5cf6' }}></span>
+                    {domainLabel}
+                    {loading && <span style={{ fontSize: '14px', opacity: 0.6, marginLeft: '15px' }}>(Se încarcă...)</span>}
+                </h2>
             </div>
-            <DomainSelect value={domain} onChange={setDomain} options={DOMAINS}/>
-       </div>
 
-       {loading && (
-        <Card title="Loading...">
-            <div className={styles.loadingText}> We are fetching the data for {title}, please wait! </div>
-            <div className={styles.progressBarContainer}>
-                <div className={styles.progressBar}/>
-            </div>
-        </Card>
-        )}
+            {error && <p style={{ color: '#ef4444' }}>{error}</p>}
 
-        {err && (
-            <div className={styles.errorBox}>{err}</div>
-        )}
-
-        {!loading && !err && (
-            <div className={styles.contentGrid}>
+            {data && !loading && (
                 <div className={styles.chartsGrid}>
-                    <LineChartCard title={inflation?.title || "Inflation"} points={inflation?.points || []}/>
-                    <LineChartCard title={consumption?.title || "Consumption"} points={consumption?.points || []}/>
-                    <LineChartCard title={trends?.title || "Trends"} points={trends?.points || []}/>
+                    {data.charts.inflation && data.charts.inflation.length > 0 && (
+                        <LineChartCard title={`Inflație - ${domainLabel}`} data={data.charts.inflation} yAxisLabel="Indice Preț" lineColor="#ef4444" />
+                    )}
+                    {data.charts.consumption && data.charts.consumption.length > 0 && (
+                        <LineChartCard title={`Consum - ${domainLabel}`} data={data.charts.consumption} yAxisLabel="Volum" lineColor="#3b82f6" />
+                    )}
+                    {data.charts.trends && data.charts.trends.length > 0 && (
+                        <LineChartCard title={`Interes Public - ${domainLabel}`} data={data.charts.trends} yAxisLabel="Căutări" lineColor="#10b981" />
+                    )}
                 </div>
+            )}
+        </div>
+    );
+}
 
-                <Card title='Insights' className={styles.aiCard}>
-                    <div className={styles.aiContent}> AI insights will be here! 
-                        <div className={styles.aiFooter}> Last update: - </div>
-                    </div>
-                </Card>
-            </div>
-        )}
-         </div>
-    )
+export default function Dashboard() {
+    const [domains, setDomains] = useState<{id: string, label: string}[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function init() {
+            try {
+                const list = await fetchUserDomains();
+                setDomains(list);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setLoading(false);
+            }
+        }
+        init();
+    }, []);
+
+    if (loading) return <div className={styles.container}><h2 style={{ color: 'currentColor' }}>Se citește profilul...</h2></div>;
+    if (domains.length === 0) return <div className={styles.container}>Nu s-au găsit domenii. Mergi la Setări pentru a alege preferințele.</div>;
+
+    return (
+        <div className={styles.container}>
+            <header className={styles.header}>
+                <h1 className={styles.title}>Analiză Economică Globală</h1>
+                <p className={styles.subtitle}>Afișare pe baza preferințelor tale din profil</p>
+            </header>
+
+            {domains.map((domain, index) => (
+                <DashboardSection key={domain.id} domainId={domain.id} domainLabel={domain.label} index={index} />
+            ))}
+        </div>
+    );
 }
