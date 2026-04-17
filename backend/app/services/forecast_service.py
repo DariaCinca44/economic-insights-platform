@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from dotenv import load_dotenv
-import google.generativeai as genai
+from groq import Groq
 from prophet import Prophet
 import logging
 
@@ -9,31 +9,39 @@ from backend.app.core.config import DOMAIN_CONFIG
 from backend.app.services.dashboard_data import get_points_for_series
 
 load_dotenv()
-API_KEY = os.getenv('API_KEY')
 
-if API_KEY:
-    genai.configure(api_key=API_KEY)
+GROQ_API_KEY = os.getenv('API_KEY')
+groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 log = logging.getLogger(__name__)
 
-def get_ai_insight(title, last_hist: float, last_fore: float):
-    if not API_KEY:
-        return 'Analiza AI momentan indisponibila'
+def get_ai_insight(title, last_hist: float, last_fore: float, months: int):
+    if not groq_client:
+        return 'Analiza AI momentan indisponibilă. (Lipsă API Key Groq)'
 
     try:
-        model = genai.GenerativeModel(model_name='gemini-1.5-flash')
+        prompt = (
+            f"Ești un strateg de business B2B. Analizăm o predicție (forecast) pentru '{title}' "
+            f"pe următoarele {months} luni din anul 2026.\n"
+            f"Ultima valoare istorică stabilizată este {last_hist:.2f}, iar modelul nostru Prophet "
+            f"estimează că va ajunge la {last_fore:.2f} la finalul perioadei.\n\n"
+            f"REGULI STRICTE:\n"
+            f"1. FĂRĂ saluturi sau introduceri de tip roleplay. Începe DIRECT analiza.\n"
+            f"2. Gândește EXCLUSIV din perspectiva unei firme/companii. NU da sfaturi populației.\n"
+            f"3. Sfatul tactic trebuie să fie ancorat în direcția trendului (cum ajustăm bugetul dacă crește/scade?).\n"
+            f"4. Folosește persoana I plural ('observăm', 'estimăm', 'recomandarea noastră strategică').\n"
+            f"5. LUNGIME MAXIMĂ: Un singur paragraf scurt (aprox. 3-4 propoziții)."
+        )
 
-        trend = 'crestere' if last_fore > last_hist else 'scadere'
-
-        prompt = f'''
-        Esti un analist economic. Analizeaza datele pentru: {title}. Valoarea actuala este {last_hist}, iar prognoza indica o {trend} pana la {last_fore}. Explica scurt (maxim 3 propozitii) ce inseamna asta pentru un om obisnuit.
-        '''
-
-        response = model.generate_content(prompt)
-        return response.text.strip()
+        chat_completion = groq_client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.1-8b-instant",
+            temperature=0.4
+        )
+        return chat_completion.choices[0].message.content.strip()
     except Exception as e:
-        print(f'Eroare Gemini: {e}')
-        return 'Eroare la generarea explicatiei AI.'
+        log.error(f'Eroare Groq: {e}')
+        return 'A apărut o eroare la generarea strategiei AI.'
 
 def fetch_all_domain_data(domain_code: str):
     config = DOMAIN_CONFIG[domain_code]
@@ -64,10 +72,9 @@ def fetch_all_domain_data(domain_code: str):
 
     return inflation_data["points"], consumption_data["points"], trends_data["points"]
 
-
 def align_dataframes(inflation_points, consumption_points, trends_points):
     if not inflation_points or not consumption_points or not trends_points:
-        raise ValueError("Date insuficiente pentru prognoza multivariata")
+        raise ValueError("Date insuficiente pentru prognoză multivariată")
     
     df_inflation= pd.DataFrame(inflation_points).rename(columns = {'date': 'ds', 'value': 'inflation'})
     df_consumption = pd.DataFrame(consumption_points).rename(columns = {'date': 'ds', 'value': 'y'})
@@ -84,13 +91,13 @@ def align_dataframes(inflation_points, consumption_points, trends_points):
     return df
 
 def generate_multivariate_forecast(domain_code: str, months: int = 6):
-    log.info (f"Generare prognoza multivariata pentru domeniul {domain_code} pe {months} luni")
+    log.info(f"Generare prognoză multivariată pentru domeniul {domain_code} pe {months} luni")
 
     info_pts, cons_pts, trends_pts = fetch_all_domain_data(domain_code)
     df = align_dataframes(info_pts, cons_pts, trends_pts)
 
     if len(df) < 12:
-        raise ValueError("Date insuficiente pentru prognoza multivariata (minim 12 puncte comune)")
+        raise ValueError("Date insuficiente pentru prognoză multivariată (minim 12 puncte comune)")
     
     m_inf = Prophet(yearly_seasonality=True, weekly_seasonality=False, daily_seasonality=False)
     m_inf.fit(df[['ds', 'inflation']].rename(columns={'inflation': 'y'}))
@@ -136,7 +143,7 @@ def generate_multivariate_forecast(domain_code: str, months: int = 6):
     last_historical = historical_points[-1]['yhat'] if historical_points else 0
     last_forecast = future_points[-1]['yhat'] if future_points else 0
 
-    ai_insight_text = get_ai_insight(domain_label, last_historical, last_forecast)
+    ai_insight_text = get_ai_insight(domain_label, last_historical, last_forecast, months)
 
     return{
         "domain": domain_code,

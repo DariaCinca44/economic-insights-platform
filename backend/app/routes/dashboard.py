@@ -1,3 +1,6 @@
+import os
+import json
+from groq import Groq
 from flask import Blueprint, jsonify, request, g
 from backend.app.core.config import DOMAIN_CONFIG
 from backend.app.core.db import get_session
@@ -90,3 +93,47 @@ def get_domain_data():
             "correlation": []
         }
     })
+
+@dashboard_bp.post("/insights")
+@require_auth
+def get_chart_insights():
+    api_key = os.getenv("API_KEY")
+    if not api_key:
+        return jsonify({"error": "API key not configured"}), 500
+    
+    client= Groq(api_key=api_key)
+
+    data= request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid request body"}), 400
+
+    title= data.get("title", "Grafic")
+    points = data.get("points", [])
+
+    if not points or len(points) < 2:
+        return jsonify({"error": "Not enough data points to generate insights"}), 400
+    
+    try:
+        compact_points = [{"date" : p.get("date"), "value": round(float(p.get("value")),2)} for p in points]
+        data_str = json.dumps(compact_points)
+    except Exception as e:
+        return jsonify({"error": "Invalid data points format"}), 400
+
+    prompt = (
+        f"Ești un consultant de business B2B care sfătuiește un antreprenor sau directorul unei firme. Graficul: '{title}'. Datele: {data_str}\n\n"
+        f"REGULI STRICTE DE GÂNDIRE:\n"
+        f"1. EȘTI INTERZIS SĂ DAI SFATURI PENTRU PERSOANE FIZICE! Nu folosi expresii ca 'oamenii să își gestioneze bugetul'. Gândește EXCLUSIV din perspectiva unei FIRME (costuri operaționale, marje de profit, furnizori, clienți B2B/B2C).\n"
+        f"2. Gândește contextual la titlu! Dacă e 'Inflație - Comunicații', înseamnă că abonamentele IT, internetul, curieratul și telefonia se scumpesc pentru firmă. Sfatul tău trebuie să fie despre securizarea contractelor B2B pe termen lung sau ajustarea bugetelor IT.\n"
+        f"3. Începe direct (fără saluturi, fără roleplay). Folosește persoana I plural ('observăm', 'recomandarea noastră strategică pentru companie').\n"
+        f"4. Structură: O frază despre trendul datelor (când e vârful absolut) + o acțiune tactică specifică de business. Maxim 4 propoziții, într-un singur paragraf fluid, fără cacofonii."
+    )
+
+    try:
+       chat_completion = client.chat.completions.create(
+           messages=[{"role": "user", "content": prompt}],
+           model="llama-3.1-8b-instant",
+           temperature=0.5
+       )
+       return jsonify({"insight": chat_completion.choices[0].message.content})
+    except Exception as e:
+        return jsonify({"error": "Failed to generate insights", "details": str(e)}), 500

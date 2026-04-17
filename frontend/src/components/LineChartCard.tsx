@@ -12,21 +12,22 @@ interface Props{
     xAxisLabel? : string;
     yAxisLabel? : string;
     lineColor? : string;
+    height?: number | string;
 }
 
-export default function LineChartCard({title, data, xAxisLabel = "Timp (luni)", yAxisLabel= "Valore", lineColor= "#8b5cf6"} : Props){
+export default function LineChartCard({title, data, xAxisLabel = "Timp (luni)", yAxisLabel= "Valore", lineColor= "#8b5cf6", height=300} : Props){
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('ro-RO', { month: 'short', year: '2-digit'});
     }
 
     return (
-        <div className={styles.card}>
+        <div className={styles.card} style={{height: '100%', display: 'flex', flexDirection: 'column'}}>
             <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>{title}</h3>
             </div>
             
-            <div className={styles.chartContainer} style={{ width: '100%', height: 300, marginTop: '20px' }}>
+            <div className={styles.chartContainer} style={{ width: '100%', height: height, marginTop: '20px', flexGrow: 1 }}>
                 {data && data.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={data} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>

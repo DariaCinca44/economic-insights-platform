@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { BarChart3, LineChart, GitCompare, FileDown, Settings, User, Moon, Sun} from "lucide-react";
+import { BarChart3, LineChart, GitCompare, FileDown, Settings, User, Moon, Sun, TrendingUp} from "lucide-react";
 import styles from './AppShell.module.css';
 
 export default function AppShell({children, theme, onToggleTheme} : {
@@ -16,52 +16,45 @@ export default function AppShell({children, theme, onToggleTheme} : {
 
     return (
         <div className={styles.wrapper}>
-            <div className= {styles.layoutGrid}>
-
-                <aside className={styles.sidebar}>
-                    <div className={styles.sidebarHeader}>
-                        <div className={styles.logo} />
-                        <div>
-                            <div className={styles.sidebarTitle}>Economic Analytics</div>
-                            <div className={styles.sidebarSubtitle}>v1</div>
-                        </div>
+            <div className = {styles.topFadeMask}></div>
+            <nav className={styles.glassNavbar}>
+                
+                <div className={styles.logoContainer}>
+                    <div className={styles.logoBox}>
+                        <TrendingUp size={20} color="white" />
                     </div>
-
-                    <nav className={styles.navContainer}>
-                        {item('/', 'Dashboard', BarChart3)}
-                        {item('/forecast', 'Forecast', LineChart)}
-                        {item('/compare', 'Compare', GitCompare)}
-                        {item('/export', 'Export', FileDown)}
-                        {item('/settings', 'Settings', Settings)}
-                        {item('/explore', 'Explore', LineChart)}
-                    </nav>
-                </aside>
-
-                <div>
-                    <header className={styles.header}>
-                        <div className={styles.headerInner}>
-                            <button onClick={onToggleTheme} className={styles.headerButton}>
-                                {theme === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}
-                                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-                            </button>
-
-                            <button className={styles.headerButton}>
-                                <span className={styles.userAvatar}>
-                                    <User size={18} />
-                                </span>
-                                My profile
-                            </button>
-                        </div>
-                    </header>
-
-                    <main className={styles.main}>
-                        <div className={styles.mainInner}>
-                            {children}
-                        </div>
-                    </main>
+                    <div>
+                        <div className={styles.logoTitle}>EcoPredict</div>
+                        <div className={styles.logoSubtitle}>Analytics v2</div>
+                    </div>
                 </div>
 
-            </div>
+                <div className={styles.navContainer}>
+                    {item('/', 'Dashboard', BarChart3)}
+                    {item('/explore', 'Explore', LineChart)}
+                    {item('/forecast', 'Forecast', LineChart)}
+                    {item('/compare', 'Compare', GitCompare)}
+                    {item('/export', 'Export', FileDown)}
+                    {item('/settings', 'Settings', Settings)}
+                </div>
+
+                <div className={styles.headerInner}>
+                    <button onClick={onToggleTheme} className={styles.headerButton}>
+                        {theme === 'dark' ? <Sun size={20}/> : <Moon size={20}/>}
+                    </button>
+
+                    <div className={styles.headerButton}>
+                        <div className={styles.avatarWrapper}> <User size={20} />
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <main className={styles.main}>
+                <div className={styles.mainInner}>
+                    {children}
+                </div>
+            </main>
         </div>
     )
 }

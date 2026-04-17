@@ -80,6 +80,14 @@ export default function DomainSetupModal({onConfirm, onComplete}: Props) {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        document.body.style.overflow = 'hidden';
+
+        return() => {
+            document.body.style.overflow = 'unset';
+        }
+    }, []);
+
+    useEffect(() => {
         const savedType = localStorage.getItem('accountType');
         if (savedType === "juridic"){
             setAccountType("juridic");

@@ -1,15 +1,14 @@
 import * as Select from '@radix-ui/react-select'
 import { Check, ChevronDown } from 'lucide-react'
-import type {Domain} from '../config/domains'
 import styles from './DomainSelect.module.css'
 
 export default function DomainSelect({value, onChange, options}:{
-    value:Domain;
-    onChange: (v:Domain) => void;
-    options: Array<{id: Domain; label: string}>;
+    value: string;
+    onChange: (v: string) => void;
+    options: Array<{id: string; label: string}>;
 }) {
     return (
-        <Select.Root value={value} onValueChange={(v) => onChange(v as Domain)}>
+        <Select.Root value={value} onValueChange={(v) => onChange(v)}>
             <Select.Trigger className={styles.trigger} aria-label='Domain'>
                 <Select.Value/>
                 <Select.Icon className={styles.icon}>
