@@ -7,6 +7,9 @@ import Card from "../components/Card";
 import GraphModal from "../components/GraphModal";
 import AnimatedKPI from "../components/AnimatedKPI";
 import {Pin} from "lucide-react";
+import PageTransition from "../components/PageTransition";
+import {Download} from "lucide-react";
+import { downloadCSV } from "../components/exportUtils";
 
 type UnifiedChart = { 
     id: string; 
@@ -175,6 +178,7 @@ export default function Dashboard() {
     }, [allAvailableCharts, pinnedGraphs]);
 
     return (
+        <PageTransition>
         <div className={styles.container}>
                 <header className={styles.header}>
                     <h1 className={styles.title}>Dashboard</h1>
@@ -219,32 +223,19 @@ export default function Dashboard() {
                                     />
                                 </div>
                                 
+                                <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10, display: 'flex', gap: '8px' }}>
+                                    <button className={styles.chartActionButton} onClick={(e) => { e.stopPropagation(); downloadCSV(graph.points, `date_${graph.id}`);}} title="Exportă CSV" >
+                                    <Download size={18} />
+                                    </button>
+
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        togglePin(graph.id);
-                                    }}
-                                    style={{
-                                        position: 'absolute',
-                                        top: '12px',
-                                        right: '12px',
-                                        zIndex: 10,
-                                        background: isPinned ? '#8b5cf6' : 'rgba(255, 255, 255, 0.9)',
-                                        color: isPinned ? 'white' : '#6b7280',
-                                        border: isPinned ? 'none' : '1px solid #e5e7eb',
-                                        borderRadius: '8px',
-                                        padding: '8px',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        transition: 'all 0.2s',
-                                        outline: 'none'
-                                    }}
-                                    title={isPinned ? "Scoate de pe Dashboard" : "Fixează pe Dashboard"}
-                                >
+                                    className={styles.chartActionButton}
+                                    onClick={(e) => { e.stopPropagation(); togglePin(graph.id);}}
+                                    style={isPinned ? { background: '#8b5cf6', color: 'white', border: 'none' } : {}}
+                                    title={isPinned ? "Scoate de pe Dashboard" : "Fixează pe Dashboard"} >
                                     <Pin size={18} style={{ fill: isPinned ? "currentColor" : "none" }} />
                                 </button>
+                                </div>
                             </div>
                         );
                     })}
@@ -265,5 +256,6 @@ export default function Dashboard() {
                 />
             )}
         </div>
+        </PageTransition>
     );
 }

@@ -88,7 +88,7 @@ export default function DomainSetupModal({onConfirm, onComplete}: Props) {
     }, []);
 
     useEffect(() => {
-        const savedType = localStorage.getItem('accountType');
+        const savedType = sessionStorage.getItem('accountType');
         if (savedType === "juridic"){
             setAccountType("juridic");
         }
@@ -118,17 +118,17 @@ export default function DomainSetupModal({onConfirm, onComplete}: Props) {
 
         try{
             const finalPrimary = isAllSelected? DOMAINS[0].id: primaryDomain;
-            localStorage.setItem("domain", finalPrimary);
+            sessionStorage.setItem("domain", finalPrimary);
 
             const validSecondaries = secondaryDomains.filter(d => d.trim() !== "");
-            localStorage.setItem("secondaryDomains", JSON.stringify(validSecondaries));
-            localStorage.setItem("isAllDomains", isAllSelected ? "true" : "false");
+            sessionStorage.setItem("secondaryDomains", JSON.stringify(validSecondaries));
+            sessionStorage.setItem("isAllDomains", isAllSelected ? "true" : "false");
 
             const res = await fetch('/api/auth/profile', {
                 method: 'PUT',
                 headers:{
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem("token")}`
+                    'Authorization': `Bearer ${sessionStorage.getItem("token")}`
                 },
                 body: JSON.stringify({
                     primaryDomain: finalPrimary,

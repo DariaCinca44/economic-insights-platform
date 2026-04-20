@@ -37,15 +37,15 @@ export default function Login(){
             }
 
             if(!isSignup){
-                localStorage.clear()
-                localStorage.setItem('token', data.token)
+                sessionStorage.clear()
+                sessionStorage.setItem('token', data.token)
 
                 if(data.user && data.user.domain){
-                    localStorage.setItem('domain', data.user.domain)
+                    sessionStorage.setItem('domain', data.user.domain)
                 }
 
                 if(data.user && data.user.accountType){
-                    localStorage.setItem('accountType', data.user.accountType)
+                    sessionStorage.setItem('accountType', data.user.accountType)
                 }
 
                 navigate('/')
@@ -56,7 +56,7 @@ export default function Login(){
                 setPassword("")
                 setLoading(false)
 
-                localStorage.setItem('accountType', accountType)
+                sessionStorage.setItem('accountType', accountType)
                 alert('Cont creat cu succes! Acum te poti conecta.')
             }
         }catch(err){

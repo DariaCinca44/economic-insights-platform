@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import styles from "./Dashboard.module.css"; 
-import { DOMAINS } from "../config/domains";
 import { fetchDomainData, type DomainData } from "../api/dashboard";
 import LineChartCard from "../components/LineChartCard";
 import { Pin, ChevronRight } from "lucide-react";
+import { fetchUserDomains } from "../api/dashboard";
+import { usePinnedGraphs } from "../hooks/usePinnedGraphs";
+import PageTransition from "../components/PageTransition";
+import { Download } from "lucide-react";
+import { downloadCSV } from "../components/exportUtils";
 
 function ExploreSection({ domainId, domainLabel, index, pinnedGraphs, onTogglePin }: { domainId: string, domainLabel: string, index: number, pinnedGraphs: string[], onTogglePin: (chartId: string) => void }) {
     const [data, setData] = useState<DomainData | null>(null);
@@ -41,30 +45,26 @@ function ExploreSection({ domainId, domainLabel, index, pinnedGraphs, onTogglePi
 
         return (
             <div style={{ position: 'relative' }}>
-                <button
-                    onClick={() => onTogglePin(chartId)}
-                    style={{
-                        position: 'absolute',
-                        top: '12px',
-                        right: '12px',
-                        zIndex: 10,
-                        background: isPinned ? '#8b5cf6' : 'rgba(255, 255, 255, 0.9)',
-                        color: isPinned ? 'white' : '#6b7280',
-                        border: isPinned ? 'none' : '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        padding: '8px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.2s',
-                        outline: 'none'
-                    }}
-                    title={isPinned ? "Scoate de pe Dashboard" : "Fixează pe Dashboard"}
-                >
-                    <Pin size={18} style={{ fill: isPinned ? "currentColor" : "none" }} />
-                </button>
-                <LineChartCard title={title} data={chartData} yAxisLabel={yAxisLabel} lineColor={lineColor} />
+                <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10, display: 'flex', gap: '8px' }}>
+                    <button
+                        className={styles.chartActionButton}
+                        onClick={() => downloadCSV(chartData, title.replace(/\s+/g, '_').toLowerCase())}
+                        title="Exportă CSV"
+                    >
+                        <Download size={18} />
+                    </button>
+                    
+                    <button
+                        onClick={() => onTogglePin(chartId)}
+                        className={styles.chartActionButton}
+                        style={isPinned ? { background: '#8b5cf6', color: 'white', border: 'none' } : {}}
+                        title={isPinned ? "Scoate de pe Dashboard" : "Fixează pe Dashboard"}
+                    >
+                        <Pin size={18} style={{ fill: isPinned ? "currentColor" : "none" }} />
+                    </button>
+                    
+                </div> 
+                    <LineChartCard title={title} data={chartData} yAxisLabel={yAxisLabel} lineColor={lineColor} />
             </div>
         );
     }
@@ -93,52 +93,25 @@ function ExploreSection({ domainId, domainLabel, index, pinnedGraphs, onTogglePi
 }
 
 export default function Explore() {
-    const [userDomains, setUserDomains] = useState<typeof DOMAINS>([]);
-    
-    const [pinnedGraphs, setPinnedGraphs] = useState<string[]>(() => {
-        const saved = localStorage.getItem('pinnedGraphs');
-        return saved ? JSON.parse(saved) : [];
-    });
+    const [userDomains, setUserDomains] = useState<any []>([]);
+    const {pinnedGraphs, togglePin} = usePinnedGraphs();
 
     useEffect(() => {
-        const isAll = localStorage.getItem('isAllDomains') === 'true';
-        
-        if (isAll) {
-            setUserDomains(DOMAINS);
-        } else {
-            const primary = localStorage.getItem('domain') || "";
-            const secondary = JSON.parse(localStorage.getItem('secondaryDomains') || '[]');
-            
-            const selectedIds = [primary, ...secondary].filter(Boolean);
-            
-            if (selectedIds.length > 0) {
-                setUserDomains(DOMAINS.filter(d => selectedIds.includes(d.id)));
-            } else {
-                setUserDomains(DOMAINS);
+        let isMounted = true;
+        async function loadDomains() {
+            try{
+                const domains = await fetchUserDomains();
+                if (isMounted) setUserDomains(domains);
+            } catch (error) {
+                console.error("Eroare la incarcarea domeniilor utilizatorului:", error);
             }
         }
+        loadDomains();
+        return () => { isMounted = false; }
     }, []);
 
-    const handleTogglePin = (chartId: string) => {
-        setPinnedGraphs(prev => {
-            if (prev.includes(chartId)) {
-                const newPinned = prev.filter(id => id !== chartId);
-                localStorage.setItem('pinnedGraphs', JSON.stringify(newPinned));
-                return newPinned;
-            }
-
-            if (prev.length >= 4) {
-                alert("Poți fixa un număr maxim de 4 grafice pe Dashboard pentru a păstra interfața curată.");
-                return prev;
-            }
-            
-            const newPinned = [...prev, chartId];
-            localStorage.setItem('pinnedGraphs', JSON.stringify(newPinned));
-            return newPinned;
-        });
-    };
-
     return (
+        <PageTransition>
         <div className={styles.container}>
             <header className={styles.header}>
                 <h1 className={styles.title}>Explorează graficele</h1>
@@ -153,12 +126,13 @@ export default function Explore() {
                         domainLabel={domain.label} 
                         index={index} 
                         pinnedGraphs={pinnedGraphs}
-                        onTogglePin={handleTogglePin}
+                        onTogglePin={togglePin}
                     />
                 ))
             ) : (
                 <p style={{textAlign: 'center', marginTop: '50px', color: '#6b7280'}}>Nu ai niciun domeniu selectat în preferințe.</p>
             )}
         </div>
+        </PageTransition>
     );
 }

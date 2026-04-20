@@ -35,3 +35,7 @@ a {
 div[onClick], button {
     outline: none !important;
 }
+
+html {
+    scrollbar-gutter: stable;
+}

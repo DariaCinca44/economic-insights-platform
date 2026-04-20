@@ -254,3 +254,38 @@
   padding: 0.3rem 0.6rem;
   border-radius: 6px;
 }
+
+.chartActionButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.9); 
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chartActionButton:hover {
+    background: #f1f5f9;
+    color: #8b5cf6;
+    border-color: #cbd5e1;
+    transform: scale(1.1);
+}
+
+:global(.dark) .chartActionButton {
+    background: rgba(30, 41, 59, 0.7) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+:global(.dark) .chartActionButton:hover {
+    background: rgba(51, 65, 85, 0.9) !important;
+    color: #a78bfa !important;
+    border-color: rgba(139, 92, 246, 0.5) !important;
+}

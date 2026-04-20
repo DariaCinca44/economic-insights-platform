@@ -49,7 +49,7 @@ export default function GraphModal({graph, onClose} : GraphModalProps) {
 
         async function fetchInsights() {
             try{
-                const token = localStorage.getItem('token');
+                const token = sessionStorage.getItem('token');
                 const response = await fetch('/api/insights', {
                     method: 'POST',
                     headers: {

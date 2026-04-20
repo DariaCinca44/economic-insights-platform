@@ -43,3 +43,4 @@ class User(Base):
     secondary_domains: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     is_all_domains: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    pinned_graphs: Mapped[list[int]] = mapped_column(JSON, default=list, nullable=False)

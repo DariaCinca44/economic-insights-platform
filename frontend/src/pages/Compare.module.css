@@ -1,0 +1,397 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.header{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: -15px;
+    margin-bottom: 35px;
+}
+
+.title{
+    font-size: 1.875rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.selectorsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+    background: #f8fafc;
+    padding: 24px;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.selectorColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.selectorLabel {
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dropdownContainer {
+    position: relative;
+    width: 100%;
+}
+
+.dropdownHeader {
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+    background: white;
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.dropdownHeader:hover {
+    border-color: #a78bfa;
+}
+
+.dropdownHeaderActive {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+}
+
+.dropdownList {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 50;
+    padding: 8px 0;
+    animation: slideDown 0.2s ease-out;
+}
+
+.dropdownItem {
+    padding: 12px 16px;
+    font-size: 15px;
+    color: #334155;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.dropdownItem:hover {
+    background: #f1f5f9;
+    color: #8b5cf6;
+    font-weight: 500;
+}
+
+.kpiGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.kpiColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.kpiBox {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.kpiLabel {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.kpiValue {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.kpiLeft { color: #3b82f6; }
+.kpiRight { color: #f97316; }
+
+.chartsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.chartCard {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.chartTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.aiSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+
+.aiButton {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3);
+}
+
+.aiButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 20px -3px rgba(139, 92, 246, 0.4);
+}
+
+.aiGlassCard {
+    width: 100%;
+    max-width: 900px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.1);
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.aiHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+    padding-bottom: 12px;
+}
+
+.aiTitle {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.aiText {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #334155;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+:global(.dark) .title {
+    color: #f8f9fa;
+}
+
+:global(.dark) .subtitle {
+    color: #94a3b8;
+}
+
+:global(.dark) .selectorsGrid {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global(.dark) .selectorLabel {
+    color: #94a3b8;
+}
+
+:global(.dark) .dropdownHeader {
+    background-color: #1e293b;
+    color: #f8f9fa;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global(.dark) .dropdownHeader:hover {
+    border-color: #8b5cf6;
+}
+
+:global(.dark) .dropdownHeaderActive {
+    border-color: #a78bfa;
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+}
+
+:global(.dark) .dropdownList {
+    background-color: #1e293b;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7);
+}
+
+:global(.dark) .dropdownItem {
+    color: #cbd5e1;
+}
+
+:global(.dark) .dropdownItem:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #a78bfa;
+}
+
+:global(.dark) .kpiBox {
+    background-color: #1e293b;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+}
+
+:global(.dark) .kpiLabel {
+    color: #94a3b8;
+}
+
+:global(.dark) .kpiLeft {
+    color: #60a5fa; 
+}
+
+:global(.dark) .kpiRight {
+    color: #fb923c; 
+}
+
+:global(.dark) .chartCard {
+    background-color: #1e293b;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+}
+
+:global(.dark) .chartTitle {
+    color: #f8f9fa;
+}
+
+:global(.dark) .recharts-text {
+    fill: #94a3b8 !important;
+}
+
+:global(.dark) .recharts-cartesian-grid-horizontal line,
+:global(.dark) .recharts-cartesian-grid-vertical line {
+    stroke: rgba(255, 255, 255, 0.05) !important;
+}
+
+:global(.dark) .recharts-legend-item-text {
+    color: #cbd5e1 !important;
+}
+
+:global(.dark) .aiGlassCard {
+    background-color: rgba(30, 41, 59, 0.7);
+    border-color: rgba(139, 92, 246, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+:global(.dark) .aiHeader {
+    border-bottom-color: rgba(139, 92, 246, 0.3);
+}
+
+:global(.dark) .aiTitle {
+    color: #f8f9fa;
+}
+
+:global(.dark) .aiText {
+    color: #cbd5e1;
+}
+
+.chartActionButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.9); 
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chartActionButton:hover {
+    background: #f1f5f9;
+    color: #8b5cf6;
+    border-color: #cbd5e1;
+    transform: scale(1.1);
+}
+
+:global(.dark) .chartActionButton {
+    background: rgba(30, 41, 59, 0.7) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+:global(.dark) .chartActionButton:hover {
+    background: rgba(51, 65, 85, 0.9) !important;
+    color: #a78bfa !important;
+    border-color: rgba(139, 92, 246, 0.5) !important;
+}

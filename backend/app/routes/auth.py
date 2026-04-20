@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify, request, g
-
 from backend.app.core.config import DOMAIN_CONFIG
 from backend.app.core.db import get_session
 from backend.app.core.models import User
 from backend.app.core.security import hash_password, verify_password, create_access_token, require_auth
+import re
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -17,6 +17,19 @@ def signup():
 
     if not email or not password:
         return jsonify({'error': 'Email and password required'}), 400
+    
+    email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    if not re.match(email_regex, email):
+        return jsonify({'error': 'Te rugăm să introduci o adresă de email validă!'}), 400
+    
+    if len(password) < 8:
+        return jsonify({'error': 'Parola trebuie sa aiba minim 8 caractere (o litera mare si o cifra)'}), 400
+    
+    if not re.search(r'[A-Z]', password):
+        return jsonify({'error': 'Parola trebuie sa contina o litera mare!'}), 400
+    
+    if not re.search(r"\d", password):
+        return jsonify({'error': 'Parola trebuie sa contina o cifra!'}), 400
 
     with get_session() as session:
         user_exists = session.query(User).filter_by(email=email).first()

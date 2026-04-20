@@ -22,7 +22,7 @@ export interface DashboardResponse{
 export async function fetchUserDomains(): Promise<{id: string, label: string}[]> {
     const res = await fetch('/api/user-domains', {
         headers:{
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${sessionStorage.getItem('token')}`
         }
     })
 
@@ -36,7 +36,7 @@ export async function fetchUserDomains(): Promise<{id: string, label: string}[]>
 
 export async function fetchDomainData(domainId: string): Promise<DomainData> {
     const res = await fetch(`/api/domain-data?domain=${domainId}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
     });
     
     if (!res.ok) {

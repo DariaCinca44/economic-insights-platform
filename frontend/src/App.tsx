@@ -13,7 +13,7 @@ import { type Domain } from "./app/userSettings"
 export default function App() {
   const [theme, setTheme] = useState<Theme>(()=> getInitialTheme())
   const [needDomain, setNeedsDomain] = useState(false)
-  const isAuthenticated = !!localStorage.getItem('token')
+  const isAuthenticated = !!sessionStorage.getItem('token')
 
   useEffect(()=>{
     applyTheme(theme)
@@ -21,7 +21,7 @@ export default function App() {
 
   useEffect(()=>{
     if(isAuthenticated) {
-      const savedDomain= localStorage.getItem('domain')
+      const savedDomain= sessionStorage.getItem('domain')
       const isMissing = !savedDomain || savedDomain === 'null' || savedDomain === 'undefined'
       setNeedsDomain(isMissing)
     }
@@ -37,7 +37,7 @@ export default function App() {
           <AppRoutes />
           {needDomain && (
           <DomainSetupModal onConfirm={async(domain: string) => {
-              localStorage.setItem('domain', domain);
+              sessionStorage.setItem('domain', domain);
               setPrefferedDomain(domain as Domain);
               setNeedsDomain(false);
               window.location.reload();

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import PageTransition from '../components/PageTransition'
 import { CartesianGrid, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Area, Line, Legend } from 'recharts'
-import { DOMAINS } from '../config/domains'
 import { Brain, CalendarClock } from 'lucide-react'
 import styles from './Forecast.module.css'
+import { fetchUserDomains } from '../api/dashboard'
+import {Download} from 'lucide-react'
+import { downloadCSV } from '../components/exportUtils'
 
 function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLabel: string }) {
     const [months, setMonths] = useState(6)
@@ -17,7 +19,7 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
             setLoading(true)
             setError("")
             try {
-                const token = localStorage.getItem('token')
+                const token = sessionStorage.getItem('token')
                 const res = await fetch(`/api/forecast?domain=${domainId}&months=${months}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
@@ -63,17 +65,28 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
                             Predicție: {domainLabel}
                         </h2>
 
-                        <div className={styles.monthsToggleGroup}>
-                            {[3, 6, 12].map(m => (
-                                <button 
-                                    key={m} 
-                                    onClick={() => setMonths(m)} 
-                                    className={`${styles.monthButton} ${months === m ? styles.monthButtonActive : styles.monthButtonInactive}`}
-                                    disabled={loading}
-                                >
-                                    {m} Luni
-                                </button>
-                            ))}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <div className={styles.monthsToggleGroup}>
+                                {[3, 6, 12].map(m => (
+                                    <button 
+                                        key={m} 
+                                        onClick={() => setMonths(m)} 
+                                        className={`${styles.monthButton} ${months === m ? styles.monthButtonActive : styles.monthButtonInactive}`}
+                                        disabled={loading}
+                                    >
+                                        {m} Luni
+                                    </button>
+                                ))}
+                            </div>
+                            
+                            <button 
+                                onClick={() => downloadCSV(chartData, `predictie_${domainId}_${months}luni`)}
+                                disabled={loading}
+                                className = {styles.chartActionButton}
+                                style={{ gap: '6px', padding: '6px 12px', fontSize: '13px' }}
+                            >
+                                <Download size={14} />
+                            </button>
                         </div>
                     </div>
 
@@ -86,7 +99,6 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
                         <div className={styles.chartContainer}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.04)" />
                                     <XAxis dataKey='date' tickFormatter={(str) => str.substring(0, 7)} tick={{fontSize: 12}} />
                                     <YAxis tick={{fontSize: 12}} domain={['auto', 'auto']} />
@@ -94,9 +106,7 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
                                     <Legend wrapperStyle={{ paddingTop: '10px' }}/>
 
                                     <Area type='monotone' dataKey={['yhat_lower', 'yhat_upper'] as any} name="Interval Predictiv" stroke='none' fill='#8b5cf6' fillOpacity={0.15} connectNulls />
-
                                     <Line type='monotone' dataKey='yhat_history' name="Istoric Confirmat" stroke='#3b82f6' strokeWidth={3} dot={false} connectNulls />
-
                                     <Line type='monotone' dataKey='yhat_forecast' name="Predicție AI (Forecast)" stroke='#8b5cf6' strokeWidth={3} strokeDasharray='8 5' dot={false} connectNulls />
                                 </ComposedChart>
                             </ResponsiveContainer>
@@ -123,7 +133,6 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
                     {!loading && data && (
                         <div className={styles.aiBadges}>
                             <span className={styles.aiBadge}>Groq Llama 3</span>
-                            <span className={styles.aiBadge} style={{marginLeft: 'auto'}}>Viitor: 2026</span>
                         </div>
                     )}
                 </div>
@@ -133,23 +142,20 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
 }
 
 export default function Forecast() {
-    const [userDomains, setUserDomains] = useState<typeof DOMAINS>([]);
+    const [userDomains, setUserDomains] = useState<any []>([]);
 
     useEffect(() => {
-        const isAll = localStorage.getItem('isAllDomains') === 'true';
-        if (isAll) {
-            setUserDomains(DOMAINS);
-        } else {
-            const primary = localStorage.getItem('domain') || "";
-            const secondary = JSON.parse(localStorage.getItem('secondaryDomains') || '[]');
-            const selectedIds = [primary, ...secondary].filter(Boolean);
-            
-            if (selectedIds.length > 0) {
-                setUserDomains(DOMAINS.filter(d => selectedIds.includes(d.id)));
-            } else {
-                setUserDomains(DOMAINS);
+        let isMounted = true;
+        async function loadDomains() {
+            try {
+                const domains = await fetchUserDomains();
+                if (isMounted) setUserDomains(domains);
+            } catch (err) {
+                console.error("Eroare la incarcarea domeniilor utilizatorului:", err);
             }
         }
+        loadDomains();
+        return () => { isMounted = false }
     }, []);
 
     return(
