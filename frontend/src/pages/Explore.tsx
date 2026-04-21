@@ -8,6 +8,7 @@ import { usePinnedGraphs } from "../hooks/usePinnedGraphs";
 import PageTransition from "../components/PageTransition";
 import { Download } from "lucide-react";
 import { downloadCSV } from "../components/exportUtils";
+import CorrelationCard from "../components/CorrelationCard";
 
 function ExploreSection({ domainId, domainLabel, index, pinnedGraphs, onTogglePin }: { domainId: string, domainLabel: string, index: number, pinnedGraphs: string[], onTogglePin: (chartId: string) => void }) {
     const [data, setData] = useState<DomainData | null>(null);
@@ -82,11 +83,19 @@ function ExploreSection({ domainId, domainLabel, index, pinnedGraphs, onTogglePi
             {error && <p style={{ color: '#ef4444' }}>{error}</p>}
 
             {data && !loading && (
-                <div className={styles.chartsGrid}>
-                    {renderChart('inflation', `Inflatie - ${domainLabel}`, data.charts.inflation, 'Indice Pret', '#ef4444')}
-                    {renderChart('consumption', `Consum - ${domainLabel}`, data.charts.consumption, 'Unitati', '#3b82f6')}
-                    {renderChart('trends', `Interes Public - ${domainLabel}`, data.charts.trends, 'Indice', '#10b981')}
-                </div>
+                <>
+                    <div className={styles.chartsGrid}>
+                        {renderChart('inflation', `Inflatie - ${domainLabel}`, data.charts.inflation, 'Indice Pret', '#ef4444')}
+                        {renderChart('consumption', `Consum - ${domainLabel}`, data.charts.consumption, 'Unitati', '#3b82f6')}
+                        {renderChart('trends', `Interes Public - ${domainLabel}`, data.charts.trends, 'Indice', '#10b981')}
+                    </div>
+
+                    <CorrelationCard
+                        domainLabel={domainLabel}
+                        trendsData={data.charts.trends || []}
+                        consumptionData={data.charts.consumption || []}
+                    />
+                </>
             )}
         </div>
     );

@@ -15,16 +15,15 @@
     position: fixed;
     top: 1.5rem; 
     left: 50%; 
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateZ(0);
+    will-change: transform, backdrop-filter;
     z-index: 1000;
-    
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 1.5rem; 
     width: 90%; 
     max-width: 1200px; 
-
     border-radius: 50px; 
 
     background: rgba(255, 255, 255, 0.25);
@@ -210,11 +209,6 @@
         #e0eafc 10%, 
         rgba(224, 234, 252, 0) 100%
     );
-    
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
 }
 
 :global(.dark) .topFadeMask {

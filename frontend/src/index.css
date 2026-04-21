@@ -9,13 +9,12 @@
 html, body, #root { 
   margin: 0;
   padding: 0;
-  height: 100%; 
+  min-height: 100vh; 
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
   color: #333;
-  min-height: 100vh;
 }
 
 button, input, select {
@@ -38,4 +37,5 @@ div[onClick], button {
 
 html {
     scrollbar-gutter: stable;
+    scroll-behavior: smooth;
 }

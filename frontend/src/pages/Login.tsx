@@ -7,6 +7,7 @@ export default function Login(){
 
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
     const [error, setError] = useState("")
     const [isSignup, setIsSignup] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -16,6 +17,12 @@ export default function Login(){
     const handleSubmit= async(e: React.FormEvent) =>{
         e.preventDefault()
         setError("")
+
+        if(isSignup && password !== confirmPassword){
+            setError("Parolele nu se potrivesc!")
+            return
+        }
+
         setLoading(true)
 
         const endpoint= isSignup? '/api/auth/signup': '/api/auth/login'
@@ -54,6 +61,7 @@ export default function Login(){
                 setIsSignup(false)
                 setEmail("")
                 setPassword("")
+                setConfirmPassword("")
                 setLoading(false)
 
                 sessionStorage.setItem('accountType', accountType)
@@ -125,6 +133,20 @@ export default function Login(){
                         />
                     </div>
 
+                    {isSignup && (
+                        <div className={styles.inputGroup}>
+                            <label>Confirmă Parola</label>
+                            <input 
+                                type="password"
+                                className={styles.input}
+                                placeholder="••••••••"
+                                value={confirmPassword}
+                                onChange={e => setConfirmPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        )}
+
                     <button type="submit" className={styles.submitBtn} disabled={loading}>
                         {loading ? 'Se proceseaza...' : (isSignup ? 'Inregistreaza-te' : 'Conecteaza-te')}
                     </button>
@@ -135,6 +157,7 @@ export default function Login(){
                     onClick={() => {
                         setIsSignup(!isSignup);
                         setError('');
+                        setConfirmPassword('');
                     }}
                 >
                     {isSignup 
