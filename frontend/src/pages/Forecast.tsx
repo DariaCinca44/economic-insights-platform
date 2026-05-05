@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import PageTransition from '../components/PageTransition'
 import { CartesianGrid, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Area, Line, Legend } from 'recharts'
-import { Brain, CalendarClock } from 'lucide-react'
+import { Brain, CalendarClock, GitCompare, Download } from 'lucide-react'
 import styles from './Forecast.module.css'
 import { fetchUserDomains } from '../api/dashboard'
-import {Download} from 'lucide-react'
 import { downloadCSV } from '../components/exportUtils'
 
 function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLabel: string }) {
@@ -12,6 +11,7 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
     const [data, setData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
+    const [showAlternatives, setShowAlternatives] = useState(false)
 
     useEffect(() => {
         let isMounted = true;
@@ -48,7 +48,8 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
         return {
             ...point,
             yhat_history: !point.is_future ? point.yhat : null,
-            yhat_forecast: (point.is_future || isConnectionPoint) ? point.yhat : null,
+            yhat_forecast: (point.is_future || isConnectionPoint) ? (data.best_model === 'Prophet' ? point.yhat : point.yhat_arima) : null,
+            yhat_alt: (point.is_future || isConnectionPoint) ? (data.best_model === 'Prophet' ? point.yhat_arima : point.yhat) : null
         };
     });
 
@@ -80,6 +81,15 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
                             </div>
                             
                             <button 
+                                onClick={() => setShowAlternatives(!showAlternatives)}
+                                disabled = {loading}
+                                className={styles.chartActionButton}
+                                style={{ gap: '8px', padding: '8px 16px', fontSize: '13px',display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}
+                            >
+                                <GitCompare size={16} color={showAlternatives ? '#ef4444' : '#8b5cf6'} /> {showAlternatives ? "Ascunde Modelele" : "Vezi Modelele Alternative"}
+                            </button>
+
+                            <button 
                                 onClick={() => downloadCSV(chartData, `predictie_${domainId}_${months}luni`)}
                                 disabled={loading}
                                 className = {styles.chartActionButton}
@@ -87,6 +97,7 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
                             >
                                 <Download size={14} />
                             </button>
+
                         </div>
                     </div>
 
@@ -108,6 +119,8 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
                                     <Area type='monotone' dataKey={['yhat_lower', 'yhat_upper'] as any} name="Interval Predictiv" stroke='none' fill='#8b5cf6' fillOpacity={0.15} connectNulls />
                                     <Line type='monotone' dataKey='yhat_history' name="Istoric Confirmat" stroke='#3b82f6' strokeWidth={3} dot={false} connectNulls />
                                     <Line type='monotone' dataKey='yhat_forecast' name="Predicție AI (Forecast)" stroke='#8b5cf6' strokeWidth={3} strokeDasharray='8 5' dot={false} connectNulls />
+                                    {showAlternatives && (
+                                    <Line type='monotone' dataKey='yhat_alt' name={`Alternativa ignorată (${data?.best_model === 'Prophet' ? 'ARIMA' : 'Prophet'})`} stroke='#f59e0b' strokeWidth={2} strokeDasharray='4 4' dot={false} connectNulls opacity={0.6} />)}
                                 </ComposedChart>
                             </ResponsiveContainer>
                         </div>
@@ -122,11 +135,11 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
                     
                     <div className={styles.aiContentBox}>
                         {loading ? (
-                            <p className={styles.aiThinking}>Agentul Groq analizează trendurile...</p>
-                        ) : data?.ai_insight ? (
-                            <p className={styles.aiText}>{data.ai_insight}</p>
+                            <p className={styles.aiThinking}>Agentul Groq analizează datele...</p>
                         ) : (
-                            <p className={styles.aiText}>Nu s-au putut genera insight-uri.</p>
+                            <p className={styles.aiText}>
+                                {!showAlternatives ? data?.ai_insight : data?.ai_automl_insight}
+                            </p>
                         )}
                     </div>
 
@@ -163,7 +176,7 @@ export default function Forecast() {
             <header className={styles.header}>
                 <h1 className={styles.title}>Predictii</h1>
                 <p className={styles.subtitle}>
-                    Anticipam evoluția din 2026 cu ajutorul modelului matematic Prophet.
+                    Anticipam evoluția din 2026 evaluând dinamic cele mai performante modele matematice.
                 </p>
             </header>
 

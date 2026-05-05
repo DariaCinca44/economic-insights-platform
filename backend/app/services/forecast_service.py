@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 from groq import Groq
 from prophet import Prophet
 import logging
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+import warnings
+warnings.filterwarnings("ignore")
 
 from backend.app.core.config import DOMAIN_CONFIG
 from backend.app.services.dashboard_data import get_points_for_series
@@ -15,34 +18,57 @@ groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 log = logging.getLogger(__name__)
 
-def get_ai_insight(title, last_hist: float, last_fore: float, months: int):
+def get_ai_insights(title, last_hist: float, prophet_fore: float, arima_fore: float, months: int, best_model: str, mae_prophet: float, mae_arima: float):
     if not groq_client:
-        return 'Analiza AI momentan indisponibilă. (Lipsă API Key Groq)'
+        return {
+            "business_insight": "Analiza AI momentan indisponibilă. (Lipsă API Key Groq)",
+            "automl_insight": "Explicația Auto-ML indisponibilă."
+        }
 
     try:
-        prompt = (
-            f"Ești un strateg de business B2B. Analizăm o predicție (forecast) pentru '{title}' "
-            f"pe următoarele {months} luni din anul 2026.\n"
-            f"Ultima valoare istorică stabilizată este {last_hist:.2f}, iar modelul nostru Prophet "
-            f"estimează că va ajunge la {last_fore:.2f} la finalul perioadei.\n\n"
+        prompt_biz = (
+            f"Ești un strateg de business B2B. Analizăm predicția pentru '{title}' pe următoarele {months} luni.\n"
+            f"Valoarea actuală este {last_hist:.2f}, iar modelul nostru estimează că va ajunge la {prophet_fore if best_model == 'Prophet' else arima_fore:.2f}.\n\n"
             f"REGULI STRICTE:\n"
-            f"1. FĂRĂ saluturi sau introduceri de tip roleplay. Începe DIRECT analiza.\n"
-            f"2. Gândește EXCLUSIV din perspectiva unei firme/companii. NU da sfaturi populației.\n"
-            f"3. Sfatul tactic trebuie să fie ancorat în direcția trendului (cum ajustăm bugetul dacă crește/scade?).\n"
-            f"4. Folosește persoana I plural ('observăm', 'estimăm', 'recomandarea noastră strategică').\n"
-            f"5. LUNGIME MAXIMĂ: Un singur paragraf scurt (aprox. 3-4 propoziții)."
+            f"1. FĂRĂ saluturi.\n"
+            f"2. Explică scurt cum ar trebui ajustat bugetul sau stocurile firmei bazat pe această evoluție a pieței.\n"
+            f"3. Folosește persoana I plural.\n"
+            f"4. Maxim 3 propoziții scurte."
         )
 
-        chat_completion = groq_client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
+        prompt_automl = (
+            f"Ești un Data Scientist. Am folosit validare Train/Test Out-of-Sample pentru '{title}'.\n"
+            f"Prophet a avut MAE = {mae_prophet:.2f}. ARIMA a avut MAE = {mae_arima:.2f}.\n"
+            f"Modelul câștigător este: {best_model}.\n\n"
+            f"REGULI STRICTE:\n"
+            f"1. FĂRĂ saluturi. Începe DIRECT explicația.\n"
+            f"2. Explică logic unui manager de ce ne bazăm pe {best_model} (argumentând prin marja de eroare MAE raportată comparativ cu celălalt model).\n"
+            f"3. Maxim 3 propoziții scurte."
+        )
+
+        resp_biz = groq_client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt_biz}],
             model="llama-3.1-8b-instant",
             temperature=0.4
         )
-        return chat_completion.choices[0].message.content.strip()
+        
+        resp_automl = groq_client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt_automl}],
+            model="llama-3.1-8b-instant",
+            temperature=0.4
+        )
+
+        return {
+            "business_insight": resp_biz.choices[0].message.content.strip(),
+            "automl_insight": resp_automl.choices[0].message.content.strip()
+        }
     except Exception as e:
         log.error(f'Eroare Groq: {e}')
-        return 'A apărut o eroare la generarea strategiei AI.'
-
+        return {
+            "business_insight": "A apărut o eroare la generarea strategiei de business.",
+            "automl_insight": "A apărut o eroare la generarea explicației Auto-ML."
+        }
+    
 def fetch_all_domain_data(domain_code: str):
     config = DOMAIN_CONFIG[domain_code]
 
@@ -119,19 +145,74 @@ def generate_multivariate_forecast(domain_code: str, months: int = 6):
 
     forecast = m_main.predict(future_main)
 
+    arima_forecast_values = []
+    arima_fitted_values = []
+
+    try:
+        df_arima = df.reset_index(drop = True)
+        model_arima = SARIMAX(df_arima['y'], exog = df_arima[['inflation', 'trends']], order=(1,1,1))
+        res_arima= model_arima.fit(disp=False)
+
+        future_exog = future_main.tail(months)[['inflation', 'trends']]
+        arima_pred = res_arima.get_forecast(steps=months, exog=future_exog)
+        arima_forecast_values = arima_pred.predicted_mean.tolist()
+    except Exception as e:
+        log.error(f"Eroare ARIMA: {e}")
+        arima_forecast_values = [None] * months
+        arima_fitted_values = [df['y'].mean()] * len(df)
+
+    test_size = 6
+    if len(df) > test_size + 12: 
+        train_df = df.iloc[:-test_size]
+        test_df = df.iloc[-test_size:]
+
+        m_test_prophet = Prophet(yearly_seasonality=True, weekly_seasonality=False, daily_seasonality=False)
+        m_test_prophet.add_regressor('inflation')
+        m_test_prophet.add_regressor('trends')
+        m_test_prophet.fit(train_df)
+        pred_prophet_test = m_test_prophet.predict(test_df)
+        
+        y_actual_test = test_df['y'].tolist()
+        mae_prophet = sum(abs(a - p) for a, p in zip(y_actual_test, pred_prophet_test['yhat'].tolist())) / test_size
+        
+        try:
+            model_test_arima = SARIMAX(train_df['y'], exog=train_df[['inflation', 'trends']], order=(1,1,1))
+            res_test_arima = model_test_arima.fit(disp=False)
+            pred_arima_test = res_test_arima.get_forecast(steps=test_size, exog=test_df[['inflation', 'trends']])
+            mae_arima = sum(abs(a - p) for a, p in zip(y_actual_test, pred_arima_test.predicted_mean.tolist())) / test_size
+        except Exception as e:
+            log.warning(f"ARIMA a eșuat la evaluarea Train/Test: {e}")
+            mae_arima = float('inf') 
+            
+        best_model = "Prophet" if mae_prophet <= mae_arima else "ARIMA"
+    else:
+        best_model = "Prophet"
+        mae_prophet = 0.0
+        mae_arima = 0.0
+
     results= []
     historical_points = []
     future_points = []
+    arima_index = 0
 
-    for _, row in forecast.iterrows():
+    for i, row in forecast.iterrows():
         is_prediction = row['ds'] > df['ds'].max()
         points_data = {
             "date" : row['ds'].isoformat(),
             "yhat": round(row['yhat'], 2),
             "yhat_lower": round(row['yhat_lower'], 2),
             "yhat_upper": round(row['yhat_upper'], 2),
-            "is_future": is_prediction
+            "is_future": is_prediction,
+            "yhat_arima" : None
         }
+
+        if is_prediction and arima_index < len(arima_forecast_values):
+            val = arima_forecast_values[arima_index]
+            points_data["yhat_arima"] = round(val, 2) if val is not None else None
+            arima_index += 1
+        elif not is_prediction:
+            points_data["yhat_arima"] = round(df.iloc[i]['y'], 2) if i < len(df) else None
+
         results.append(points_data)
 
         if is_prediction:
@@ -142,12 +223,15 @@ def generate_multivariate_forecast(domain_code: str, months: int = 6):
     domain_label = DOMAIN_CONFIG[domain_code]["label"]
     last_historical = historical_points[-1]['yhat'] if historical_points else 0
     last_forecast = future_points[-1]['yhat'] if future_points else 0
+    last_forecast_arima = future_points[-1]['yhat_arima'] if future_points and future_points[-1]['yhat_arima'] else 0
 
-    ai_insight_text = get_ai_insight(domain_label, last_historical, last_forecast, months)
+    insights = get_ai_insights(domain_label, last_historical, last_forecast, last_forecast_arima, months, best_model, mae_prophet, mae_arima)
 
-    return{
+    return {
         "domain": domain_code,
         "forecast_months": months,
         "data": results,
-        "ai_insight": ai_insight_text
+        "ai_insight": insights["business_insight"],
+        "ai_automl_insight": insights["automl_insight"],
+        "best_model": best_model
     }
