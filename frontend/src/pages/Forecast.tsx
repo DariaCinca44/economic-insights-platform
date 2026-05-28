@@ -44,12 +44,15 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
 
     const chartData = rawChartData.map((point: any, index: number) => {
         const isConnectionPoint = index === lastHistIndex;
+        const lower_bound = data.best_model === 'Prophet' ? point.yhat_lower : point.yhat_arima_lower;
+        const upper_bound = data.best_model === 'Prophet' ? point.yhat_upper : point.yhat_arima_upper;
         
         return {
             ...point,
             yhat_history: !point.is_future ? point.yhat : null,
             yhat_forecast: (point.is_future || isConnectionPoint) ? (data.best_model === 'Prophet' ? point.yhat : point.yhat_arima) : null,
-            yhat_alt: (point.is_future || isConnectionPoint) ? (data.best_model === 'Prophet' ? point.yhat_arima : point.yhat) : null
+            yhat_alt: (point.is_future || isConnectionPoint) ? (data.best_model === 'Prophet' ? point.yhat_arima : point.yhat) : null,
+            interval: (point.is_future || isConnectionPoint) ? [lower_bound, upper_bound] : null
         };
     });
 
@@ -116,7 +119,7 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
                                     <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)',backgroundColor: 'rgba(255, 255, 255, 0.95)' }} labelStyle={{ color: '#0f172a', fontWeight: 'bold',marginBottom: '5px' }} labelFormatter={(label) => { const date = new Date(label); const formattedDate = date.toLocaleDateString('ro-RO', { month: 'long', year: 'numeric' }); return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1); }} />
                                     <Legend wrapperStyle={{ paddingTop: '10px' }}/>
 
-                                    <Area type='monotone' dataKey={['yhat_lower', 'yhat_upper'] as any} name="Interval Predictiv" stroke='none' fill='#8b5cf6' fillOpacity={0.15} connectNulls />
+                                    <Area type='monotone' dataKey='interval' name="Interval Predictiv" stroke='none' fill='#3f11ac' fillOpacity={0.15} connectNulls />
                                     <Line type='monotone' dataKey='yhat_history' name="Istoric Confirmat" stroke='#3b82f6' strokeWidth={3} dot={false} connectNulls />
                                     <Line type='monotone' dataKey='yhat_forecast' name="Predicție AI (Forecast)" stroke='#8b5cf6' strokeWidth={3} strokeDasharray='8 5' dot={false} connectNulls />
                                     {showAlternatives && (

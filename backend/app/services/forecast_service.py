@@ -146,7 +146,8 @@ def generate_multivariate_forecast(domain_code: str, months: int = 6):
     forecast = m_main.predict(future_main)
 
     arima_forecast_values = []
-    arima_fitted_values = []
+    arima_lower_values = []
+    arima_upper_values = []
 
     try:
         df_arima = df.reset_index(drop = True)
@@ -155,11 +156,16 @@ def generate_multivariate_forecast(domain_code: str, months: int = 6):
 
         future_exog = future_main.tail(months)[['inflation', 'trends']]
         arima_pred = res_arima.get_forecast(steps=months, exog=future_exog)
+
         arima_forecast_values = arima_pred.predicted_mean.tolist()
+        arima_conf = arima_pred.conf_int(alpha=0.05)
+        arima_lower_values = arima_conf.iloc[:, 0].tolist()
+        arima_upper_values = arima_conf.iloc[:, 1].tolist()
     except Exception as e:
         log.error(f"Eroare ARIMA: {e}")
         arima_forecast_values = [None] * months
-        arima_fitted_values = [df['y'].mean()] * len(df)
+        arima_lower_values = [None] * months
+        arima_upper_values = [None] * months
 
     test_size = 6
     if len(df) > test_size + 12: 
@@ -209,9 +215,18 @@ def generate_multivariate_forecast(domain_code: str, months: int = 6):
         if is_prediction and arima_index < len(arima_forecast_values):
             val = arima_forecast_values[arima_index]
             points_data["yhat_arima"] = round(val, 2) if val is not None else None
+
+            val_lower = arima_lower_values[arima_index]
+            points_data["yhat_arima_lower"] = round(val_lower, 2) if val_lower is not None else None
+
+            val_upper = arima_upper_values[arima_index]
+            points_data["yhat_arima_upper"] = round(val_upper, 2) if val_upper is not None else None
+
             arima_index += 1
         elif not is_prediction:
             points_data["yhat_arima"] = round(df.iloc[i]['y'], 2) if i < len(df) else None
+            points_data["yhat_arima_lower"] = None
+            points_data["yhat_arima_upper"] = None
 
         results.append(points_data)
 
@@ -235,3 +250,4 @@ def generate_multivariate_forecast(domain_code: str, months: int = 6):
         "ai_automl_insight": insights["automl_insight"],
         "best_model": best_model
     }
+    
