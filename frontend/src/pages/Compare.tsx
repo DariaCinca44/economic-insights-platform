@@ -211,7 +211,7 @@ export default function Compare() {
                 </div>
                 <div className={styles.selectorColumn}>
                     <label className={styles.selectorLabel}>Competiție (Piața Globală)</label>
-                    <CustomDropdown options={DOMAINS} value={rightDomainId} onChange={setRightDomainId} />
+                    <CustomDropdown options={DOMAINS.filter(d => d.id !== leftDomainId)} value={rightDomainId} onChange={setRightDomainId} />
                 </div>
             </div>
 

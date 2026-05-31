@@ -148,7 +148,7 @@ function ForecastSection({ domainId, domainLabel }: { domainId: string, domainLa
 
                     {!loading && data && (
                         <div className={styles.aiBadges}>
-                            <span className={styles.aiBadge}>Groq Llama 3</span>
+                            <span className={styles.aiBadge}>Groq Llama 3.1</span>
                         </div>
                     )}
                 </div>

@@ -222,7 +222,7 @@ export default function DomainSetupModal({onConfirm, onComplete}: Props) {
                                 <SmoothDropdown 
                                         value={secDomain} 
                                         onChange={(val: string) => handleUpdateSecondary(index, val)} 
-                                        options={DOMAINS} 
+                                        options={DOMAINS.filter(d=> d.id !== primaryDomain && (!secondaryDomains.includes(d.id) || d.id === secDomain))} 
                                         placeholder="Selecteaza domeniul secundar..."
                                         disabledValue={primaryDomain} 
                                     />

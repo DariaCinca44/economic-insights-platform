@@ -129,7 +129,7 @@ def get_chart_insights():
         f"1. EȘTI INTERZIS SĂ DAI SFATURI PENTRU PERSOANE FIZICE! Gândește EXCLUSIV din perspectiva unei FIRME (costuri operaționale, marje de profit, furnizori B2B).\n"
         f"2. ANCOREAZĂ SFATUL ÎN DOMENIU: Este obligatoriu să folosești termeni specifici industriei din titlu ('{title}'). Dacă e 'Sănătate', vorbește despre clinici, consumabile medicale sau asigurări. Dacă e 'Transport', vorbește despre flote auto, carburant, logistică. Nu da sfaturi generice precum 'reduceți costurile'.\n"
         f"3. Începe direct (fără saluturi, fără introduceri). Folosește persoana I plural ('observăm', 'recomandarea noastră').\n"
-        f"4. Structură: O frază despre trendul datelor + o acțiune tactică de business ultra-specifică domeniului. Maxim 4 propoziții, un singur paragraf."
+        f"4. Structură: O frază despre trendul datelor + o acțiune tactică de business ultra-specifică domeniului.OBLIGATORIU: Scrie TOTUL intr-un SINGUR paragraf compact. SUNT INTERZISE liniile noi (Enter-urile/paragrafele multiple). LIMITA MAXIMA: 95 de cuvinte."
     )
 
     try:
@@ -185,11 +185,12 @@ def get_comparison_insights():
     prompt = (
         f"Ești un consultant strategic B2B de top. Sarcina ta este să analizezi și să compari oportunitățile de business între două sectoare diferite: '{domain_left}' și '{domain_right}'.\n\n"
         f"REGULI STRICTE DE GENERARE:\n"
-        f"1. Folosește EXACT numele '{domain_left}' și '{domain_right}' în analiză.\n"
-        f"2. FĂRĂ SFATURI GENERICE! Oferă sfaturi bazate pe realitatea fizică a fiecărui domeniu. Folosește vocabular specific (ex: pentru 'Alimente' vorbește despre lanțuri de aprovizionare, materii prime; pentru 'Educație' vorbește despre training-uri, digitalizare, retenție personal).\n"
-        f"3. FĂRĂ SFATURI PENTRU PERSOANE FIZICE! Adresează-te unui CEO care trebuie să decidă unde să își aloce bugetele (Capex/Opex) între cele două piețe.\n"
-        f"4. Fără introduceri sau concluzii banale. Începe direct analiza.\n"
-        f"5. Structură: O frază care evidențiază diferența de risc/oportunitate dintre '{domain_left}' și '{domain_right}' + o recomandare tactică clară de migrare a resurselor. Maxim 4 propoziții."
+        f"REDACTARE: Scrie într-o limbă română IMPECABILĂ, fluentă, cu acorduri gramaticale corecte și diacritice.\n"
+        f"2. Folosește EXACT numele '{domain_left}' și '{domain_right}' în analiză.\n"
+        f"3. FĂRĂ SFATURI GENERICE! Oferă sfaturi bazate pe realitatea fizică a fiecărui domeniu. Folosește vocabular specific (ex: pentru 'Alimente' vorbește despre lanțuri de aprovizionare, materii prime; pentru 'Educație' vorbește despre training-uri, digitalizare, retenție personal).\n"
+        f"4. FĂRĂ SFATURI PENTRU PERSOANE FIZICE! Adresează-te unui CEO care trebuie să decidă unde să își aloce bugetele (Capex/Opex) între cele două piețe.\n"
+        f"5. Fără introduceri sau concluzii banale. Începe direct analiza.\n"
+        f"6. Structură: O frază care evidențiază diferența de risc/oportunitate dintre '{domain_left}' și '{domain_right}' + o recomandare tactică clară de migrare a resurselor. Maxim 4 propoziții."
     )
 
     try:

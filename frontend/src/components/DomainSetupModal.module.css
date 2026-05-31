@@ -288,3 +288,71 @@
   background: transparent;
   color: inherit;
 }
+
+:global(.dark) .modalContent {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+:global(.dark) .title {
+  color: #f8fafc;
+}
+
+:global(.dark) .description {
+  color: #94a3b8;
+}
+
+:global(.dark) .dropdownTrigger {
+  background-color: #0f172a;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+:global(.dark) .dropdownTrigger:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+:global(.dark) .dropdownTriggerFocus {
+  border-color: #8b5cf6;
+  background-color: #1e293b;
+}
+
+:global(.dark) .dropdownMenu {
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+}
+
+:global(.dark) .dropdownItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #a78bfa;
+}
+
+:global(.dark) .smoothCheckboxContainer {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+:global(.dark) .smoothCheckboxContainer:hover {
+  background: rgba(139, 92, 246, 0.15);
+}
+
+:global(.dark) .checkboxLabel {
+  color: #f8fafc;
+}
+
+:global(.dark) .addBtn {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+:global(.dark) .addBtn:hover {
+  border-color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
+}
+
+:global(.dark) .formGroup label {
+  color: #cbd5e1;
+}

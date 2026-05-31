@@ -7,8 +7,7 @@ export function getInitialTheme(): Theme{
         return saved;
     }
 
-    const prefDark = window.matchMedia?.("(prefers-color-scheme: daark")?.matches
-    return prefDark? 'dark': 'light'
+    return 'light';
 }
 
 export function applyTheme(theme: Theme){

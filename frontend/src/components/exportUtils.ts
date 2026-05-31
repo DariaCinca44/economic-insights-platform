@@ -4,14 +4,19 @@ export const downloadCSV = (data: any[], filename: string) => {
         return;
     }
 
-    const headers = Object.keys(data[0]);
+    const headerSet = new Set<string>();
+    data.forEach(row => Object.keys(row).forEach(key => headerSet.add(key)));
+
+    const headers = Array.from(headerSet).sort((a,b) => a === 'date' ? -1 : b === 'date' ? 1 : 0);
 
     const csvRows = [];
-    csvRows.push(headers.join(','));
+    const escapedHeaders = headers.map(header => `"${header.replace(/"/g, '\\"')}"`);
+    csvRows.push(escapedHeaders.join(','));
 
     for (const row of data) {
         const values = headers.map(header => {
-            const escaped = ('' + row[header]).replace(/"/g, '\\"');
+            const val = row[header] !== undefined && row[header] !== null ? row[header] : '';
+            const escaped = ('' + val).replace(/"/g, '\\"');
             return `"${escaped}"`;
         });
         csvRows.push(values.join(','));
